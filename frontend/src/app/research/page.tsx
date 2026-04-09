@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Nunito } from "next/font/google";
+import { FadeIn } from "@/components/fade-in";
 import {
   ArrowLeft,
   ArrowRight,
@@ -106,36 +107,40 @@ export default function HowItWorksPage() {
       className={`min-h-screen bg-[#fcfbf9] text-neutral-800 ${nunito.variable} font-[family-name:var(--font-nunito)]`}
     >
       <div className="mx-auto max-w-6xl px-6 py-16 sm:py-24">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-neutral-500 transition hover:text-neutral-900"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Link>
-        
-        <div className="mb-14 max-w-8=9xl">
-          <h2 className="text-3xl font-bold leading-relaxed text-neutral-900">
-            Agentic AI career coach blueprint with project diagrams, system flowcharts, and product architecture. This documentation provides an overview of the implementation, architecture, and deployment strategy for PlaceAI.
-          </h2>
-        </div>
+        <FadeIn>
+          <Link
+            href="/"
+            className="mb-8 inline-flex items-center gap-2 text-sm text-neutral-500 transition hover:text-neutral-900"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Link>
+          
+          <div className="mb-14 max-w-8=9xl">
+            <h2 className="text-3xl font-bold leading-relaxed text-neutral-900">
+              Agentic AI career coach blueprint with project diagrams, system flowcharts, and product architecture. This documentation provides an overview of the implementation, architecture, and deployment strategy for PlaceAI.
+            </h2>
+          </div>
+        </FadeIn>
 
         <div className="flex flex-col items-start gap-12 lg:flex-row">
           <aside className="sticky top-24 w-full shrink-0 lg:w-64">
-            <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-900">
-              Table of Contents
-            </h3>
-            <nav className="flex flex-col gap-3 border-l border-neutral-200">
-              {pageSections.map((section) => (
-                <a
-                  key={section.id}
-                  href={`#${section.id}`}
-                  className="block -ml-[1px] border-l-2 border-transparent pl-4 text-sm text-neutral-500 transition hover:border-neutral-300 hover:text-neutral-900"
-                >
-                  {section.title}
-                </a>
-              ))}
-            </nav>
+            <FadeIn delay={0.2}>
+              <h3 className="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-900">
+                Table of Contents
+              </h3>
+              <nav className="flex flex-col gap-3 border-l border-neutral-200">
+                {pageSections.map((section) => (
+                  <a
+                    key={section.id}
+                    href={`#${section.id}`}
+                    className="block -ml-[1px] border-l-2 border-transparent pl-4 text-sm text-neutral-500 transition hover:border-neutral-300 hover:text-neutral-900"
+                  >
+                    {section.title}
+                  </a>
+                ))}
+              </nav>
+            </FadeIn>
           </aside>
 
           <div className="flex-1 max-w-[700px] space-y-16">
@@ -398,10 +403,12 @@ function Section({
 }) {
   return (
     <section id={id} className="scroll-mt-32">
-      <h2 className="mb-4 text-xl font-semibold tracking-tight text-neutral-900">
-        {title}
-      </h2>
-      {children}
+      <FadeIn>
+        <h2 className="mb-4 text-xl font-semibold tracking-tight text-neutral-900">
+          {title}
+        </h2>
+        {children}
+      </FadeIn>
     </section>
   );
 }

@@ -25,7 +25,41 @@ import {
 } from "@/components/primitives/accordion";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage, AvatarGroup } from "@/components/primitives/avatar";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/primitives/tooltip";
 
+const AVATARS = [
+  {
+    src: 'https://pbs.twimg.com/profile_images/1948770261848756224/oPwqXMD6_400x400.jpg',
+    fallback: 'SK',
+    tooltip: 'Skyleen',
+  },
+  {
+    src: 'https://pbs.twimg.com/profile_images/1593304942210478080/TUYae5z7_400x400.jpg',
+    fallback: 'CN',
+    tooltip: 'Shadcn',
+  },
+  {
+    src: 'https://pbs.twimg.com/profile_images/1677042510839857154/Kq4tpySA_400x400.jpg',
+    fallback: 'AW',
+    tooltip: 'Adam Wathan',
+  },
+  {
+    src: 'https://pbs.twimg.com/profile_images/1783856060249595904/8TfcCN0r_400x400.jpg',
+    fallback: 'GR',
+    tooltip: 'Guillermo Rauch',
+  },
+  {
+    src: 'https://pbs.twimg.com/profile_images/1534700564810018816/anAuSfkp_400x400.jpg',
+    fallback: 'JH',
+    tooltip: 'Jhey',
+  },
+  {
+    src: 'https://pbs.twimg.com/profile_images/1927474594102784000/Al0g-I6o_400x400.jpg',
+    fallback: 'DH',
+    tooltip: 'David Haz',
+  },
+];
 /* ── GSAP (tree-shakeable import) ─────────────────────────── */
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -212,16 +246,42 @@ export default function LandingPage() {
 function HeroSection() {
   const typed = useTypewriter(["Software Engineer", "Data Analyst", "Product Manager", "UX Designer", "DevOps Engineer"], 70, 40, 2500);
 
-  const [msgs, setMsgs] = useState([
-    { role: "ai" as const, text: "Hey Priya! TCS posted a new JD — your match is 81%. They need SQL.", vis: false },
-    { role: "user" as const, text: "That's amazing! Show me the plan.", vis: false },
-    { role: "ai" as const, text: "I remember you struggled with JOINs. Day 1 starts there. Plan adjusted.", vis: false },
-  ]);
+  const ALL_MESSAGES = useMemo(() => [
+    { role: "ai" as const, text: "Hey Priya! TCS posted a new JD — your match is 81%. They need SQL." },
+    { role: "user" as const, text: "That's amazing! Show me the plan." },
+    { role: "ai" as const, text: "I remember you struggled with JOINs. Day 1 starts there. Plan adjusted." },
+    { role: "user" as const, text: "How long is the prep plan?" },
+    { role: "ai" as const, text: "4 weeks. I've scheduled your first mock interview for tomorrow." },
+    { role: "user" as const, text: "Thanks! I'll review my notes today." },
+  ], []);
+
+  const [visibleMsgs, setVisibleMsgs] = useState<any[]>([]);
 
   useEffect(() => {
-    const ts = msgs.map((_, i) => setTimeout(() => setMsgs((p) => p.map((m, j) => j === i ? { ...m, vis: true } : m)), 1200 + i * 1000));
-    return () => ts.forEach(clearTimeout);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    let currentIndex = 0;
+    
+    const showNextMessage = () => {
+      setVisibleMsgs(prev => {
+        const nextMsg = ALL_MESSAGES[currentIndex % ALL_MESSAGES.length];
+        const updated = [...prev, { ...nextMsg, uniqueId: `${currentIndex}-${Date.now()}` }];
+        if (updated.length > 3) {
+          updated.shift();
+        }
+        return updated;
+      });
+      currentIndex++;
+    };
+
+    // Show first message immediately
+    showNextMessage();
+
+    // Then interval for the loop
+    const interval = setInterval(() => {
+      showNextMessage();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [ALL_MESSAGES]);
 
   return (
     <section className="relative overflow-hidden min-h-screen flex items-center" data-nav-theme="light">
@@ -240,7 +300,7 @@ function HeroSection() {
                 <SectionEyebrow>AI-powered Career Coach</SectionEyebrow>
               </motion.div>
 
-              <motion.h1 variants={fadeUp} className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-gray-900">
+              <motion.h1 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.08] text-gray-900">
                 Your career deserves
                 <br />
                 prep that actually{" "}
@@ -249,27 +309,27 @@ function HeroSection() {
                 </span>
               </motion.h1>
 
-              <motion.div variants={fadeUp} className="flex items-center gap-2 text-gray-400 text-base sm:text-lg">
+              <motion.div variants={fadeUp} className="flex items-center gap-2 text-gray-400 text-sm sm:text-base">
                 <span>Preparing for</span>
-                <span className="text-gray-900 font-medium min-w-[180px] sm:min-w-[220px]">
+                <span className="text-gray-900 font-normal min-w-[180px] sm:min-w-[220px]">
                   {typed}<span className="animate-pulse" style={{ color: "var(--landing-accent)" }}>|</span>
                 </span>
               </motion.div>
 
-              <motion.p variants={fadeUp} className="text-base sm:text-lg text-gray-500 max-w-md leading-relaxed">
+              <motion.p variants={fadeUp} className="text-sm sm:text-base text-gray-500 max-w-md leading-relaxed font-light">
                 Real-time AI coaching, practice tailored to your dream company,
                 and offers — faster. No cheating, just proven prep.
               </motion.p>
 
               <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-4">
                 <Link href="/login">
-                  <Button size="lg" className="rounded-full px-7 sm:px-8 py-6 text-sm sm:text-base text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-shadow" style={{ background: "var(--landing-accent)" }}>
+                  <Button size="lg" className="rounded-full px-7 sm:px-8 py-6 text-sm text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-shadow font-medium" style={{ background: "var(--landing-accent)" }}>
                     Start Free Mock Interview
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/research" className="flex items-center gap-2 text-gray-400 hover:text-gray-700 transition text-sm group">
-                  <span className="h-10 w-10 rounded-full border border-gray-300 flex items-center justify-center group-hover:border-gray-400 transition">
+                <Link href="/research" className="flex items-center gap-2 text-gray-400 hover:text-gray-700 transition text-sm font-normal group">
+                  <span className="h-10 w-10 border border-gray-300 rounded-full flex items-center justify-center group-hover:border-gray-400 transition">
                     <Play className="h-3.5 w-3.5 ml-0.5 text-gray-500" />
                   </span>
                   Research
@@ -278,14 +338,27 @@ function HeroSection() {
 
               {/* social proof */}
               <motion.div variants={fadeUp} className="flex items-center gap-4 pt-2">
-                <div className="flex -space-x-2">
-                  {["PS", "RM", "AI", "VP"].map((ini, i) => (
-                    <div key={i} className="h-8 w-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-medium" style={{ background: "rgba(124,91,240,0.1)", color: "var(--landing-accent)" }}>
-                      {ini}
-                    </div>
-                  ))}
+                <TooltipProvider delay={0}>
+                  <AvatarGroup className="flex -space-x-3">
+                    {AVATARS.map((avatar, index) => (
+                      <Tooltip key={index}>
+                        <TooltipTrigger>
+                          <Avatar size="sm" className="size-10 sm:size-11 border-2 border-white ring-0 transition-transform hover:-translate-y-1 hover:scale-110 shadow-sm hover:shadow-md cursor-pointer relative z-0 hover:z-10 bg-white">
+                            <AvatarImage src={avatar.src} />
+                            <AvatarFallback>{avatar.fallback}</AvatarFallback>
+                          </Avatar>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" sideOffset={6} className="font-medium text-[11px]">
+                          {avatar.tooltip}
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </AvatarGroup>
+                </TooltipProvider>
+                <div className="flex flex-col justify-center">
+                  <p className="text-sm font-semibold text-gray-800 leading-tight">500+ students</p>
+                  <p className="text-xs text-gray-500 font-medium tracking-wide">placed this year</p>
                 </div>
-                <p className="text-sm"><span className="text-gray-700 font-medium">500+ students</span> <span className="text-gray-400">placed this year</span></p>
               </motion.div>
             </motion.div>
 
@@ -304,14 +377,27 @@ function HeroSection() {
                     </div>
                   </div>
                   {/* messages */}
-                  <div className="space-y-3 min-h-[190px]">
-                    <AnimatePresence>
-                      {msgs.map((m, i) => m.vis && (
-                        <motion.div key={i} initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] as const }} className={cn("rounded-xl p-3 max-w-[85%]", m.role === "ai" ? "text-gray-700" : "ml-auto text-white")} style={m.role === "user" ? { background: "var(--landing-accent)" } : { background: "var(--surface)" }}>
-                          <p className="text-sm leading-relaxed">{m.text}</p>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
+                  <div className="flex flex-col justify-end h-[240px] overflow-hidden relative">
+                    {/* Add a subtle top fade mask so disappearing messages blend out nicely */}
+                    <div className="absolute top-0 left-0 w-full h-8 z-10 pointer-events-none" style={{ background: "linear-gradient(to bottom, white, transparent)" }}/>
+                    <div className="space-y-3 flex flex-col justify-end">
+                      <AnimatePresence mode="popLayout">
+                        {visibleMsgs.map((m) => (
+                          <motion.div 
+                            key={m.uniqueId} 
+                            layout
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }} 
+                            animate={{ opacity: 1, y: 0, scale: 1 }} 
+                            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }} 
+                            className={cn("rounded-xl p-3 max-w-[85%] shrink-0", m.role === "ai" ? "text-gray-700" : "ml-auto text-white")} 
+                            style={m.role === "user" ? { background: "var(--landing-accent)" } : { background: "var(--surface)" }}
+                          >
+                            <p className="text-sm leading-relaxed">{m.text}</p>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
                   </div>
                   {/* typing dots */}
                   <div className="mt-4 flex items-center gap-2">
