@@ -45,6 +45,11 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Landing page palette */
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-landing-accent: var(--landing-accent);
 }
 
 :root {
@@ -80,6 +85,11 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Landing page surfaces */
+  --surface: #f4f0fb;
+  --surface-raised: #ffffff;
+  --landing-accent: #7c5bf0;
 }
 
 .dark {
@@ -145,10 +155,30 @@
 }
 
 .animate-slide-left {
-  animation: slide-left 25s linear infinite;
+  animation: slide-left 30s linear infinite;
 }
 
 /* Smooth scroll */
 html {
   scroll-behavior: smooth;
+}
+
+/* GSAP parallax helpers */
+.parallax-section {
+  will-change: transform;
+}
+
+/* Ticker separator diamond */
+.ticker-diamond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ticker-diamond::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: #7c5bf0;
+  transform: rotate(45deg);
+  border-radius: 1.5px;
 }
