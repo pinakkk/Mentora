@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { extractAndStoreFacts } from "@/server/memory/fact-extractor";
 
 function getServiceClient() {
   return createServiceClient(
@@ -97,6 +98,11 @@ export async function POST(req: Request) {
       .update({ messages })
       .eq("id", existing.id);
 
+    // Async fact extraction — non-blocking (fire and forget)
+    if (messages.length >= 2) {
+      extractAndStoreFacts(student.id, messages).catch(() => {});
+    }
+
     return NextResponse.json({ conversationId: existing.id });
   } else {
     // Create new conversation
@@ -113,6 +119,11 @@ export async function POST(req: Request) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Async fact extraction — non-blocking
+    if (messages.length >= 2) {
+      extractAndStoreFacts(student.id, messages).catch(() => {});
     }
 
     return NextResponse.json({ conversationId: newConv.id });

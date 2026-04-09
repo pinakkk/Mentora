@@ -23,14 +23,18 @@ export class MemoryManager {
 
     const embedding = await embedText(fact);
 
+    const now = new Date().toISOString();
     const { data, error } = await supabase
       .from("memory_facts")
       .insert({
+        id: crypto.randomUUID(),
         student_id: studentId,
         fact,
         category,
         importance,
         embedding: JSON.stringify(embedding),
+        created_at: now,
+        updated_at: now,
       })
       .select("id")
       .single();
@@ -130,6 +134,7 @@ export class MemoryManager {
     const embedding = await embedText(summary);
 
     await supabase.from("conversation_summaries").insert({
+      id: crypto.randomUUID(),
       student_id: studentId,
       conversation_id: conversationId,
       summary,
