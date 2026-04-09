@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
 import {
-  Brain,
-  Target,
-  MessageSquare,
-  BookOpen,
+  Bot,
+  FileSearch,
+  Users,
+  Route,
   ArrowRight,
   Star,
   CheckCircle2,
@@ -27,6 +27,13 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage, AvatarGroup } from "@/components/primitives/avatar";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/primitives/tooltip";
+import { Open_Sans } from "next/font/google";
+
+const openSans = Open_Sans({
+  subsets: ["latin"],
+  variable: "--font-open-sans",
+  display: "swap",
+});
 
 const AVATARS = [
   {
@@ -205,7 +212,15 @@ export default function LandingPage() {
   const containerRef = useParallax();
 
   return (
-    <div ref={containerRef} className="min-h-screen" style={{ background: "var(--surface)" }}>
+    <div ref={containerRef} className={`min-h-screen home-page-container ${openSans.variable}`} style={{ background: "var(--surface)" }}>
+      <style>{`
+        .home-page-container p {
+          font-family: var(--font-open-sans), "Open Sans", sans-serif;
+          font-optical-sizing: auto;
+          font-style: normal;
+          font-variation-settings: "wdth" 100;
+        }
+      `}</style>
       <LandingNavbar />
       <HeroSection />
       <InfinityTicker />
@@ -446,10 +461,10 @@ function InfinityTicker() {
 function PlatformOverview() {
   const [active, setActive] = useState(0);
   const features = [
-    { icon: Brain, title: "AI Career Coach", desc: "6 specialized agents that think, decide, and act — collaborating through shared memory to understand your unique journey.", color: "#7c5bf0", light: "rgba(124,91,240,0.08)" },
-    { icon: Target, title: "Resume Deep Dive", desc: "AI-powered analysis with skill gap detection. Cross-references your claims with evidence and suggests improvements.", color: "#10b981", light: "rgba(16,185,129,0.08)" },
-    { icon: MessageSquare, title: "Mock Interviews", desc: "Company-specific, adaptive difficulty simulations with rubric-based scoring and real-time feedback.", color: "#8b5cf6", light: "rgba(139,92,246,0.08)" },
-    { icon: BookOpen, title: "Personalized Plans", desc: "2/4/8-week prep plans mapped to your target companies, dynamically adjusting as you progress.", color: "#f59e0b", light: "rgba(245,158,11,0.08)" },
+    { icon: Bot, title: "AI Career Coach", desc: "6 specialized agents that think, decide, and act — collaborating through shared memory to understand your unique journey.", color: "#7c5bf0", light: "rgba(124,91,240,0.08)" },
+    { icon: FileSearch, title: "Resume Deep Dive", desc: "AI-powered analysis with skill gap detection. Cross-references your claims with evidence and suggests improvements.", color: "#10b981", light: "rgba(16,185,129,0.08)" },
+    { icon: Users, title: "Mock Interviews", desc: "Company-specific, adaptive difficulty simulations with rubric-based scoring and real-time feedback.", color: "#8b5cf6", light: "rgba(139,92,246,0.08)" },
+    { icon: Route, title: "Personalized Plans", desc: "2/4/8-week prep plans mapped to your target companies, dynamically adjusting as you progress.", color: "#f59e0b", light: "rgba(245,158,11,0.08)" },
   ];
 
   return (
@@ -732,8 +747,8 @@ function TestimonialsSection() {
             </motion.h2>
           </div>
           <motion.div variants={fadeUp} className="flex items-center gap-4">
-            <div className="flex -space-x-2">{[0, 1, 2, 3].map((i) => (<div key={i} className="h-8 w-8 rounded-full bg-gray-300 border-2 border-white" />))}</div>
-            <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ background: "var(--landing-accent)" }}>You?</span>
+            {/* <div className="flex -space-x-2">{[0, 1, 2, 3].map((i) => (<div key={i} className="h-8 w-8 rounded-full bg-gray-300 border-2 border-white" />))}</div>
+            <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ background: "var(--landing-accent)" }}>You?</span> */}
           </motion.div>
         </motion.div>
 
@@ -781,19 +796,19 @@ function SolutionsSection() {
 
         <div className="grid md:grid-cols-2 gap-5 sm:gap-6" data-reveal>
           <TiltCard>
-            <div className="rounded-3xl text-white p-8 sm:p-10 space-y-8 h-full" style={{ background: "#1a1a2e" }}>
+            <div className="rounded-3xl p-8 sm:p-10 space-y-8 h-full border-2 border-white shadow-xl shadow-purple-500/5" style={{ background: "var(--surface)" }}>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading text-xl sm:text-2xl font-bold">Personal AI Coach</h3>
-                <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium" style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>01</span>
+                <h3 className="font-heading text-xl sm:text-2xl font-bold text-gray-900">Personal AI Coach</h3>
+                <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium border-2 border-white shadow-sm" style={{ background: "rgba(124,91,240,0.06)", color: "var(--landing-accent)" }}>01</span>
               </div>
-              <p className="text-white/40 text-sm leading-relaxed">Your dedicated AI mentor that learns your strengths, weaknesses, and goals.</p>
+              <p className="text-gray-500 text-sm leading-relaxed">Your dedicated AI mentor that learns your strengths, weaknesses, and goals.</p>
               <div className="space-y-3">{studentFeatures.map((f, i) => (
-                <div key={i} className="flex items-center justify-between p-3.5 rounded-xl border" style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}>
-                  <span className="text-sm font-medium text-white/75">{f}</span>
+                <div key={i} className="flex items-center justify-between p-3.5 rounded-xl border bg-white shadow-sm" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
+                  <span className="text-sm font-medium text-gray-700">{f}</span>
                   <CheckCircle2 className="h-4 w-4" style={{ color: "var(--landing-accent)" }} />
                 </div>
               ))}</div>
-              <Link href="/login"><Button className="rounded-full bg-white text-gray-950 hover:bg-white/90 mt-2">Boost My Prep <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
+              <Link href="/login"><Button className="rounded-full text-white mt-2" style={{ background: "var(--landing-accent)" }}>Boost My Prep <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
             </div>
           </TiltCard>
 
