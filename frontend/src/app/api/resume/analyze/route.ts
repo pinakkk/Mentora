@@ -42,15 +42,37 @@ export async function POST(req: Request) {
 
     const serviceClient = getServiceClient();
 
-    // Get student
-    const { data: student } = await serviceClient
+    // Get or create student
+    let { data: student } = await serviceClient
       .from("students")
       .select("id")
       .eq("auth_id", user.id)
       .single();
 
-    if (!student)
-      return NextResponse.json({ error: "Student not found" }, { status: 404 });
+    if (!student) {
+      const now = new Date().toISOString();
+      const { data: newStudent, error: createErr } = await serviceClient
+        .from("students")
+        .insert({
+          id: crypto.randomUUID(),
+          auth_id: user.id,
+          name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Student",
+          email: user.email!,
+          avatar_url: user.user_metadata?.avatar_url,
+          role: "student",
+          skills: [],
+          readiness: 0,
+          onboarded: false,
+          preferences: {},
+          created_at: now,
+          updated_at: now,
+        })
+        .select("id")
+        .single();
+      if (createErr || !newStudent)
+        return NextResponse.json({ error: "Failed to create student" }, { status: 500 });
+      student = newStudent;
+    }
 
     // Use AI to analyze the resume
     // Wrap model with extractJsonMiddleware to strip markdown code fences from response

@@ -3,17 +3,107 @@
 import { useChat } from "@ai-sdk/react";
 import { TextStreamChatTransport } from "ai";
 import { useRef, useEffect, useState, useMemo, useCallback } from "react";
-import { Send, Brain, Loader2, Paperclip, Sparkles } from "lucide-react";
+import { Send, Loader2, Paperclip, Sparkles } from "lucide-react";
 import { Button } from "@/components/primitives/button";
 import { ScrollArea } from "@/components/primitives/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/primitives/avatar";
 import { ToolCallDisplay } from "./tool-call-display";
-import { TypingIndicator } from "./typing-indicator";
+import ReactMarkdown from "react-markdown";
 
 interface ChatInterfaceProps {
   apiEndpoint?: string;
   extraBody?: Record<string, unknown>;
   placeholder?: string;
+}
+
+function TypingDots() {
+  return (
+    <div className="flex gap-2.5">
+      <Avatar className="h-7 w-7 shrink-0 mt-0.5">
+        <AvatarFallback className="text-[10px] bg-violet-100 text-violet-600 font-medium">
+          AI
+        </AvatarFallback>
+      </Avatar>
+      <div className="bg-gray-50 border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3">
+        <div className="flex gap-1.5 items-center h-5">
+          <div className="h-2 w-2 rounded-full bg-violet-300 animate-[pulse_1.4s_ease-in-out_infinite]" />
+          <div className="h-2 w-2 rounded-full bg-violet-400 animate-[pulse_1.4s_ease-in-out_0.2s_infinite]" />
+          <div className="h-2 w-2 rounded-full bg-violet-500 animate-[pulse_1.4s_ease-in-out_0.4s_infinite]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarkdownMessage({ content }: { content: string }) {
+  return (
+    <div className="prose-chat text-sm leading-relaxed text-gray-900">
+      <ReactMarkdown
+        components={{
+          p: ({ children }) => <p className="mb-1.5 last:mb-0">{children}</p>,
+          strong: ({ children }) => (
+            <span className="font-semibold text-gray-900">{children}</span>
+          ),
+          em: ({ children }) => (
+            <span className="italic text-gray-700">{children}</span>
+          ),
+          ul: ({ children }) => (
+            <ul className="list-disc list-inside mb-1.5 space-y-0.5 text-gray-800">
+              {children}
+            </ul>
+          ),
+          ol: ({ children }) => (
+            <ol className="list-decimal list-inside mb-1.5 space-y-0.5 text-gray-800">
+              {children}
+            </ol>
+          ),
+          li: ({ children }) => <li className="text-sm">{children}</li>,
+          code: ({ children, className }) => {
+            const isBlock = className?.includes("language-");
+            if (isBlock) {
+              return (
+                <pre className="bg-gray-900 text-gray-100 rounded-lg px-3 py-2 my-2 overflow-x-auto text-xs">
+                  <code>{children}</code>
+                </pre>
+              );
+            }
+            return (
+              <code className="bg-gray-100 text-violet-700 px-1 py-0.5 rounded text-xs font-mono">
+                {children}
+              </code>
+            );
+          },
+          pre: ({ children }) => <>{children}</>,
+          h1: ({ children }) => (
+            <p className="font-semibold text-base mb-1">{children}</p>
+          ),
+          h2: ({ children }) => (
+            <p className="font-semibold text-sm mb-1">{children}</p>
+          ),
+          h3: ({ children }) => (
+            <p className="font-semibold text-sm mb-1">{children}</p>
+          ),
+          a: ({ href, children }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-violet-600 hover:underline"
+            >
+              {children}
+            </a>
+          ),
+          blockquote: ({ children }) => (
+            <blockquote className="border-l-2 border-violet-200 pl-3 my-1.5 text-gray-600 italic">
+              {children}
+            </blockquote>
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
 }
 
 export function ChatInterface({
@@ -108,7 +198,9 @@ export function ChatInterface({
     }
   }
 
-  function getMessageText(message: { parts?: Array<{ type: string; text?: string }> }) {
+  function getMessageText(message: {
+    parts?: Array<{ type: string; text?: string }>;
+  }) {
     return (
       message.parts
         ?.filter((p) => p.type === "text")
@@ -125,7 +217,9 @@ export function ChatInterface({
             <div className="h-14 w-14 rounded-2xl bg-violet-50 flex items-center justify-center mb-4">
               <Sparkles className="h-7 w-7 text-violet-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900">PlaceAI Coach</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              PlaceAI Coach
+            </h3>
             <p className="text-gray-400 text-sm max-w-sm mt-2 leading-relaxed">
               I remember everything about your journey and proactively help you
               prepare for campus placements.
@@ -214,9 +308,9 @@ export function ChatInterface({
                             key={i}
                             className="bg-gray-50 border border-gray-100 rounded-2xl rounded-tl-sm py-3 px-4"
                           >
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-900">
-                              {(part as { text: string }).text}
-                            </p>
+                            <MarkdownMessage
+                              content={(part as { text: string }).text}
+                            />
                           </div>
                         );
                       }
@@ -228,7 +322,7 @@ export function ChatInterface({
             </div>
           ))}
 
-          {isLoading && messages.length > 0 && <TypingIndicator />}
+          {isLoading && messages.length > 0 && <TypingDots />}
 
           {error && (
             <div className="text-center py-3">
@@ -254,7 +348,10 @@ export function ChatInterface({
               style={{ fieldSizing: "content" } as React.CSSProperties}
             />
             <div className="absolute right-2 bottom-1.5 flex items-center gap-1">
-              <button type="button" className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+              <button
+                type="button"
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
                 <Paperclip className="w-4 h-4" />
               </button>
               <Button

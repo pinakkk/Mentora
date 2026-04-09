@@ -5,16 +5,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   MessageSquare,
-  LayoutDashboard,
-  FileText,
-  Mic2,
-  CalendarDays,
+  LayoutGrid,
+  FileSearch,
+  Mic,
+  CalendarRange,
   Building2,
-  Brain,
-  Shield,
+  BookOpen,
+  ShieldCheck,
   LogOut,
   Menu,
   Bell,
+  Brain,
 } from "lucide-react";
 import { Button } from "@/components/primitives/button";
 import { Avatar, AvatarFallback } from "@/components/primitives/avatar";
@@ -23,17 +24,17 @@ import { useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
 const mainNav = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutGrid },
   { name: "Chat", href: "/chat", icon: MessageSquare },
-  { name: "Resume", href: "/resume", icon: FileText },
-  { name: "Mock Interview", href: "/mock", icon: Mic2 },
-  { name: "Prep Plan", href: "/plan", icon: CalendarDays },
+  { name: "Resume", href: "/resume", icon: FileSearch },
+  { name: "Mock Interview", href: "/mock", icon: Mic },
+  { name: "Prep Plan", href: "/plan", icon: CalendarRange },
   { name: "Companies", href: "/companies", icon: Building2 },
-  { name: "Coach's Notebook", href: "/memory", icon: Brain },
+  { name: "Coach's Notebook", href: "/memory", icon: BookOpen },
 ];
 
 const adminNav = [
-  { name: "TPC Dashboard", href: "/admin", icon: Shield },
+  { name: "TPC Dashboard", href: "/admin", icon: ShieldCheck },
 ];
 
 interface AppShellProps {
