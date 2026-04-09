@@ -27,80 +27,70 @@ export interface AgentContext {
 
 /**
  * Build full context for agent calls.
- * Called before every agent invocation to inject relevant memory.
- * Gracefully degrades if memory/embedding services are unavailable.
+ * Optimized to keep total context under ~400 tokens:
+ * - Top 5 memories (not 10) — most relevant only
+ * - 2 recent conversations (not 3)
+ * - Compact formatting (no verbose labels)
  */
 export async function buildContext(
   studentId: string,
   userMessage: string
 ): Promise<AgentContext> {
-  // Run all fetches in parallel — each one is independently fault-tolerant
   const [student, memories, summaries, tasks] = await Promise.all([
     getStudentProfile(studentId),
-    memoryManager.recall(studentId, userMessage, 10, 0.4).catch((err) => {
-      console.error("Memory recall failed (continuing without):", err);
-      return [];
-    }),
-    memoryManager.getRecentSummaries(studentId, 3).catch((err) => {
-      console.error("Conversation summaries failed (continuing without):", err);
-      return [];
-    }),
+    memoryManager.recall(studentId, userMessage, 5, 0.45).catch(() => []),
+    memoryManager.getRecentSummaries(studentId, 2).catch(() => []),
     getPendingTasks(studentId),
   ]);
 
-  // Format memories
+  // Compact memory format: "[category] fact" (no importance/relevance % — saves tokens)
   const relevantMemories = memories.length
     ? memories
-        .map(
-          (m) =>
-            `[${m.category}/${m.importance}] ${m.fact} (relevance: ${(
-              (m.similarity || 0) * 100
-            ).toFixed(0)}%)`
-        )
+        .map((m) => `[${m.category}] ${m.fact}`)
         .join("\n")
-    : "No relevant memories found.";
+    : "None.";
 
-  // Format recent conversations
+  // Compact conversation format
   const recentConversations = summaries.length
     ? summaries
         .map(
           (s: { summary: string; created_at: string }) =>
-            `[${new Date(s.created_at).toLocaleDateString()}] ${s.summary}`
+            `${new Date(s.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}: ${s.summary}`
         )
         .join("\n")
-    : "No previous conversations.";
+    : "None.";
 
-  // Format tasks
+  // Compact task format: only pending, max 5
   const pendingTasksList = tasks
     .filter(
       (t: { status: string }) =>
         t.status === "pending" || t.status === "in_progress"
     )
+    .slice(0, 5)
     .map(
       (t: { title: string; priority: string; deadline: string | null }) =>
         `- ${t.title} (${t.priority}${
-          t.deadline ? `, due: ${new Date(t.deadline).toLocaleDateString()}` : ""
+          t.deadline
+            ? `, ${new Date(t.deadline).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
+            : ""
         })`
     )
     .join("\n");
 
-  // Upcoming deadlines
+  // Compact deadlines: top 3 only
   const upcomingDeadlines = tasks
     .filter(
       (t: { deadline: string | null; status: string }) =>
         t.deadline && t.status !== "completed"
     )
     .sort(
-      (
-        a: { deadline: string | null },
-        b: { deadline: string | null }
-      ) =>
+      (a: { deadline: string | null }, b: { deadline: string | null }) =>
         new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime()
     )
-    .slice(0, 5)
+    .slice(0, 3)
     .map(
       (t: { title: string; deadline: string | null }) =>
-        `- ${t.title}: ${new Date(t.deadline!).toLocaleDateString()}`
+        `- ${t.title}: ${new Date(t.deadline!).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
     )
     .join("\n");
 
@@ -119,8 +109,8 @@ export async function buildContext(
     },
     relevantMemories,
     recentConversations,
-    pendingTasks: pendingTasksList || "No pending tasks.",
-    upcomingDeadlines: upcomingDeadlines || "No upcoming deadlines.",
+    pendingTasks: pendingTasksList || "None.",
+    upcomingDeadlines: upcomingDeadlines || "None.",
   };
 }
 
@@ -136,9 +126,10 @@ async function getStudentProfile(studentId: string) {
 async function getPendingTasks(studentId: string) {
   const { data } = await supabase
     .from("tasks")
-    .select("*")
+    .select("title, priority, deadline, status")
     .eq("student_id", studentId)
     .in("status", ["pending", "in_progress"])
-    .order("deadline", { ascending: true });
+    .order("deadline", { ascending: true })
+    .limit(8);
   return data || [];
 }

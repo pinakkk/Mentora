@@ -22,6 +22,13 @@ export async function POST(req: Request) {
 
   const systemPrompt = `You are an expert interview evaluator. Score the candidate's answer objectively.
 
+CRITICAL SCORING RULES:
+- If the candidate says "I don't know", "no idea", "I'm not sure", "pass", gives a blank answer, or clearly does not attempt the question: score MUST be 0 or 1.
+- If the candidate gives a vague or very incomplete answer with minimal effort: score 2-3.
+- A partial but reasonable attempt: score 4-6.
+- A good answer: score 7-8.
+- An excellent, comprehensive answer: score 9-10.
+
 Return ONLY valid JSON (no markdown, no code fences):
 {
   "score": <number 0-10>,

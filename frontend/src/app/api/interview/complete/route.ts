@@ -108,14 +108,13 @@ Return ONLY valid JSON (no markdown, no code fences):
     console.error("Failed to save assessment:", assessmentError);
   }
 
-  // Store memory facts asynchronously
+  // Store a single concise memory fact (no transcripts, no per-question bloat)
   storeInterviewMemory(
     student.id,
     companyName,
     interviewType,
     overallScore,
-    debrief,
-    questions
+    debrief
   ).catch((err) => console.error("Memory storage error:", err));
 
   // Update readiness score
@@ -138,47 +137,24 @@ async function storeInterviewMemory(
   interviewType: string,
   overallScore: number,
   debrief: { strengths?: string[]; improvements?: string[] },
-  questions: Array<{ score: number; questionText: string; feedback: string }>
 ) {
-  // Store milestone
-  await memoryManager.storeFact(
-    studentId,
-    `Completed ${interviewType} mock interview for ${companyName}: scored ${overallScore.toFixed(1)}/10`,
-    "milestone",
-    overallScore >= 7 ? "high" : "medium"
-  );
+  // Store ONE concise fact combining result + key takeaways.
+  // This reduces embedding calls from 4+ to 1 and keeps memory lean.
+  const parts: string[] = [
+    `${companyName} ${interviewType} mock: ${overallScore.toFixed(1)}/10`,
+  ];
 
-  // Store top strengths
   if (debrief.strengths?.length) {
-    await memoryManager.storeFact(
-      studentId,
-      `Strengths in ${companyName} ${interviewType} mock: ${debrief.strengths.join(", ")}`,
-      "skill",
-      "medium"
-    );
+    parts.push(`Strong: ${debrief.strengths.slice(0, 2).join(", ")}`);
   }
-
-  // Store top struggles
   if (debrief.improvements?.length) {
-    await memoryManager.storeFact(
-      studentId,
-      `Needs improvement after ${companyName} ${interviewType} mock: ${debrief.improvements.join(", ")}`,
-      "struggle",
-      "high"
-    );
+    parts.push(`Improve: ${debrief.improvements.slice(0, 2).join(", ")}`);
   }
 
-  // Store specific low-scoring question struggles
-  for (const q of questions) {
-    if (q.score <= 4) {
-      await memoryManager.storeFact(
-        studentId,
-        `Struggled with: "${q.questionText.slice(0, 100)}" — ${q.feedback}`,
-        "struggle",
-        "high"
-      );
-    }
-  }
+  const category = overallScore >= 7 ? "milestone" : overallScore >= 4 ? "skill" : "struggle";
+  const importance = overallScore >= 7 ? "high" : "medium";
+
+  await memoryManager.storeFact(studentId, parts.join(". "), category, importance);
 }
 
 async function updateReadiness(studentId: string) {
