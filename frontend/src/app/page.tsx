@@ -10,13 +10,13 @@ import {
   ArrowRight,
   Star,
   CheckCircle2,
-  Sparkles,
   Play,
   ArrowUpRight,
 } from "lucide-react";
 import LandingNavbar from "@/components/landing-navbar";
+import { Casestudy5 } from "@/components/ui/casestudy-5";
+import { BotMessageSquareIcon } from "@/components/ui/bot-message-square";
 import { Button } from "@/components/primitives/button";
-import { Badge } from "@/components/primitives/badge";
 import {
   Accordion,
   AccordionContent,
@@ -101,34 +101,6 @@ function SectionEyebrow({
 }
 
 /* ── animated counter ────────────────────────────────────── */
-function useAnimatedCounter(target: number, duration = 2000) {
-  const [count, setCount] = useState(0);
-  const [hasStarted, setHasStarted] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting && !hasStarted) setHasStarted(true); },
-      { threshold: 0.3 },
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [hasStarted]);
-
-  useEffect(() => {
-    if (!hasStarted) return;
-    let n = 0;
-    const step = target / (duration / 16);
-    const id = setInterval(() => {
-      n += step;
-      if (n >= target) { setCount(target); clearInterval(id); }
-      else setCount(Math.floor(n));
-    }, 16);
-    return () => clearInterval(id);
-  }, [hasStarted, target, duration]);
-
-  return { count, ref };
-}
 
 /* ── typewriter ──────────────────────────────────────────── */
 function useTypewriter(texts: string[], speed = 60, deleteSpeed = 30, pause = 2200) {
@@ -139,9 +111,19 @@ function useTypewriter(texts: string[], speed = 60, deleteSpeed = 30, pause = 22
   useEffect(() => {
     const full = texts[idx];
     let t: ReturnType<typeof setTimeout>;
-    if (!deleting && text === full) t = setTimeout(() => setDeleting(true), pause);
-    else if (deleting && text === "") { setDeleting(false); setIdx((i) => (i + 1) % texts.length); }
-    else t = setTimeout(() => setText(deleting ? full.slice(0, text.length - 1) : full.slice(0, text.length + 1)), deleting ? deleteSpeed : speed);
+    if (!deleting && text === full) {
+      t = setTimeout(() => setDeleting(true), pause);
+    } else if (deleting && text === "") {
+      t = setTimeout(() => {
+        setDeleting(false);
+        setIdx((i) => (i + 1) % texts.length);
+      }, 0);
+    } else {
+      t = setTimeout(
+        () => setText(deleting ? full.slice(0, text.length - 1) : full.slice(0, text.length + 1)),
+        deleting ? deleteSpeed : speed,
+      );
+    }
     return () => clearTimeout(t);
   }, [text, deleting, idx, texts, speed, deleteSpeed, pause]);
 
@@ -255,11 +237,17 @@ function HeroSection() {
     { role: "user" as const, text: "Thanks! I'll review my notes today." },
   ], []);
 
-  const [visibleMsgs, setVisibleMsgs] = useState<any[]>([]);
+  type HeroMessage = {
+    role: "ai" | "user";
+    text: string;
+    uniqueId: string;
+  };
+
+  const [visibleMsgs, setVisibleMsgs] = useState<HeroMessage[]>([]);
 
   useEffect(() => {
     let currentIndex = 0;
-    
+
     const showNextMessage = () => {
       setVisibleMsgs(prev => {
         const nextMsg = ALL_MESSAGES[currentIndex % ALL_MESSAGES.length];
@@ -369,7 +357,7 @@ function HeroSection() {
                   {/* header */}
                   <div className="flex items-center gap-3 mb-5">
                     <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg,#7c5bf0,#a78bfa)" }}>
-                      <Brain className="h-5 w-5 text-white" />
+                      <BotMessageSquareIcon className="h-5 w-5 text-white" />
                     </div>
                     <div>
                       <p className="font-semibold text-sm text-gray-900">PlaceAI Coach</p>
@@ -379,18 +367,18 @@ function HeroSection() {
                   {/* messages */}
                   <div className="flex flex-col justify-end h-[240px] overflow-hidden relative">
                     {/* Add a subtle top fade mask so disappearing messages blend out nicely */}
-                    <div className="absolute top-0 left-0 w-full h-8 z-10 pointer-events-none" style={{ background: "linear-gradient(to bottom, white, transparent)" }}/>
+                    <div className="absolute top-0 left-0 w-full h-8 z-10 pointer-events-none" style={{ background: "linear-gradient(to bottom, white, transparent)" }} />
                     <div className="space-y-3 flex flex-col justify-end">
                       <AnimatePresence mode="popLayout">
                         {visibleMsgs.map((m) => (
-                          <motion.div 
-                            key={m.uniqueId} 
+                          <motion.div
+                            key={m.uniqueId}
                             layout
-                            initial={{ opacity: 0, y: 20, scale: 0.95 }} 
-                            animate={{ opacity: 1, y: 0, scale: 1 }} 
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }} 
-                            className={cn("rounded-xl p-3 max-w-[85%] shrink-0", m.role === "ai" ? "text-gray-700" : "ml-auto text-white")} 
+                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }}
+                            className={cn("rounded-xl p-3 max-w-[85%] shrink-0", m.role === "ai" ? "text-gray-700" : "ml-auto text-white")}
                             style={m.role === "user" ? { background: "var(--landing-accent)" } : { background: "var(--surface)" }}
                           >
                             <p className="text-sm leading-relaxed">{m.text}</p>
@@ -466,7 +454,7 @@ function PlatformOverview() {
 
   return (
     <section id="features" className="py-24 sm:py-28" style={{ background: "var(--surface)" }} data-nav-theme="light">
-      <div className="mx-auto max-w-7xl px-5 sm:px-6">
+      <div className="mx-auto max-w-5xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center space-y-4 mb-16 sm:mb-20">
           <motion.div variants={fadeUp}>
             <SectionEyebrow>Platform Overview</SectionEyebrow>
@@ -485,21 +473,21 @@ function PlatformOverview() {
           {/* feature list */}
           <div className="space-y-3">
             {features.map((f, i) => (
-              <div key={i} onClick={() => setActive(i)} className={cn("flex items-start gap-4 p-5 rounded-2xl border cursor-pointer transition-all duration-300", active === i ? "text-white shadow-lg" : "bg-white/80 hover:bg-white border-black/[0.06]")} style={active === i ? { background: "#1a1a2e", borderColor: "#1a1a2e" } : undefined}>
-                <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: active === i ? "rgba(255,255,255,0.12)" : f.light }}>
-                  <f.icon className="h-5 w-5" style={{ color: active === i ? "white" : f.color }} />
+              <div key={i} onClick={() => setActive(i)} className={cn("flex items-start gap-4 p-5 rounded-2xl border cursor-pointer transition-all duration-300", active === i ? "bg-white shadow-[0_8px_30px_rgba(124,91,240,0.12)] border-[#7c5bf0]/30 ring-1 ring-[#7c5bf0]/10" : "bg-white/60 hover:bg-white border-black/[0.04]")}>
+                <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: active === i ? "rgba(124,91,240,0.1)" : f.light }}>
+                  <f.icon className="h-5 w-5" style={{ color: active === i ? "#7c5bf0" : f.color }} />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold">{f.title}</p>
+                  <p className={cn("font-semibold", active === i ? "text-gray-900" : "text-gray-700")}>{f.title}</p>
                   <AnimatePresence mode="wait">
                     {active === i && (
-                      <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="text-sm mt-1 leading-relaxed" style={{ color: active === i ? "rgba(255,255,255,0.6)" : undefined }}>
+                      <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="text-sm mt-1 leading-relaxed text-gray-500">
                         {f.desc}
                       </motion.p>
                     )}
                   </AnimatePresence>
                 </div>
-                <ArrowUpRight className={cn("h-4 w-4 ml-auto shrink-0 transition-all", active === i ? "text-white/50 rotate-0" : "text-gray-300 -rotate-45")} />
+                <ArrowUpRight className={cn("h-4 w-4 ml-auto shrink-0 transition-all", active === i ? "text-[#7c5bf0] rotate-0" : "text-gray-300 -rotate-45")} />
               </div>
             ))}
           </div>
@@ -576,25 +564,59 @@ function PlatformOverview() {
 /* ─────────────────────────────────────────────────────────── */
 
 function PainPointsSection() {
-  const pains = [
-    { text: "No more interview anxiety", icon: "😰" },
-    { text: "Forget about tricky questions", icon: "🤔" },
-    { text: "Stop struggling to structure answers", icon: "📝" },
-    { text: "Say bye to ignored applications", icon: "👋" },
-    { text: "Skip the lack of feedback", icon: "💬" },
-    { text: "Done with salary confusion", icon: "💰" },
-    { text: "No more feeling unprepared", icon: "📚" },
-    { text: "Break free from low confidence", icon: "💪" },
-  ];
-  const stats = [
-    { value: 65, suffix: "%", label: "less interview anxiety with AI coaching" },
-    { value: 50, suffix: "%", label: "faster job placement rate" },
-    { value: 70, suffix: "%", label: "more confidence with structured feedback" },
+  const painCards = [
+    {
+      eyebrow: "Interview Confidence",
+      title: "No more interview anxiety or messy answers.",
+      subtitle:
+        "PlaceAI turns panic into preparation with guided mock rooms, clearer storytelling, and structured practice that matches real placement rounds.",
+      points: [
+        "No more interview anxiety",
+        "Forget about tricky questions",
+        "Stop struggling to structure answers",
+        "No more feeling unprepared",
+      ],
+      metric: {
+        value: "65%",
+        label: "less interview anxiety with AI coaching",
+      },
+      href: "/login",
+    },
+    {
+      eyebrow: "Application Clarity",
+      title: "Get noticed instead of getting ignored.",
+      subtitle:
+        "Sharper resumes, role-fit preparation, and feedback loops help you apply with intent instead of guessing what recruiters want.",
+      points: [
+        "Say bye to ignored applications",
+        "Skip the lack of feedback",
+      ],
+      metric: {
+        value: "50%",
+        label: "faster job placement rate",
+      },
+      href: "#how-it-works",
+    },
+    {
+      eyebrow: "Career Direction",
+      title: "Replace confusion with real placement momentum.",
+      subtitle:
+        "From salary expectations to self-belief, PlaceAI gives students a steady plan and honest signals on what to improve next.",
+      points: [
+        "Done with salary confusion",
+        "Break free from low confidence",
+      ],
+      metric: {
+        value: "70%",
+        label: "more confidence with structured feedback",
+      },
+      href: "#solutions",
+    },
   ];
 
   return (
     <section className="py-24 sm:py-28" style={{ background: "white" }} data-nav-theme="light">
-      <div className="mx-auto max-w-7xl px-5 sm:px-6">
+      <div className="mx-auto max-w-5xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-14 sm:mb-16">
           <motion.div variants={fadeUp}>
             <SectionEyebrow>How We Help</SectionEyebrow>
@@ -602,28 +624,17 @@ function PainPointsSection() {
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mt-4">
             We Solve Your Placement<br /><span className="italic">Struggles</span>
           </motion.h2>
+          <motion.p variants={fadeUp} className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-gray-500 sm:text-lg">
+            Clearer prep, stronger applications, and better feedback at every stage of placement season.
+          </motion.p>
         </motion.div>
 
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-16 sm:mb-20">
-          {pains.map((p, i) => (
-            <motion.div key={i} variants={fadeUp} whileHover={{ y: -4, transition: { duration: 0.2 } }} className="flex items-center gap-3 p-4 rounded-xl border cursor-default group transition-all hover:shadow-md" style={{ background: "var(--surface)", borderColor: "rgba(0,0,0,0.06)" }}>
-              <span className="text-lg">{p.icon}</span>
-              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">{p.text}</span>
-            </motion.div>
-          ))}
+        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+          <Casestudy5
+            featuredCasestudy={painCards[0]}
+            casestudies={painCards.slice(1)}
+          />
         </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-5 sm:gap-6" data-reveal>
-          {stats.map((s, i) => {
-            const { count, ref } = useAnimatedCounter(s.value);
-            return (
-              <div key={i} ref={ref} className="text-center p-7 sm:p-8 rounded-2xl border" style={{ background: "var(--surface)", borderColor: "rgba(0,0,0,0.06)" }}>
-                <p className="text-5xl md:text-6xl font-bold tracking-tight font-heading">{count}{s.suffix}</p>
-                <p className="text-gray-500 mt-3 text-sm">{s.label}</p>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </section>
   );
@@ -642,7 +653,7 @@ function HowItWorksSection() {
 
   return (
     <section id="how-it-works" className="py-24 sm:py-28" style={{ background: "var(--surface)" }} data-nav-theme="light">
-      <div className="mx-auto max-w-7xl px-5 sm:px-6">
+      <div className="mx-auto max-w-5xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-16 sm:mb-20">
           <motion.div variants={fadeUp}>
             <SectionEyebrow>How It Works</SectionEyebrow>
@@ -842,44 +853,38 @@ function FAQSection() {
   return (
     <section id="faq" className="py-24 sm:py-28" style={{ background: "white" }} data-nav-theme="light">
       <div className="mx-auto max-w-7xl px-5 sm:px-6">
-        <div className="grid lg:grid-cols-[1fr,360px] gap-12 lg:gap-16">
-          <div>
-            <SectionEyebrow className="mb-4">FAQ</SectionEyebrow>
-            <h2 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight">Got Questions?<br /><span className="italic">We&apos;ve Got Answers</span></h2>
-            <p className="text-gray-500 mt-3 max-w-lg">Can&apos;t find what you&apos;re looking for? Chat with our AI coach — always online.</p>
+        <div className="max-w-2xl">
+          <SectionEyebrow className="mb-4">FAQ</SectionEyebrow>
+          <h2 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight">Got Questions?<br /><span className="italic">We&apos;ve Got Answers</span></h2>
+          <p className="text-gray-500 mt-3 max-w-lg">Everything students usually ask before starting mock interviews, coaching, and placement prep.</p>
 
-            <div className="flex gap-2 mt-8 flex-wrap">
-              {tabs.map((t) => (
-                <button key={t} onClick={() => setTab(t)} className={cn("px-4 py-2 rounded-full text-sm font-medium transition-all duration-200", tab === t ? "text-white shadow-md" : "border text-gray-600 hover:bg-gray-100")} style={tab === t ? { background: "var(--landing-accent)" } : { borderColor: "rgba(0,0,0,0.08)", background: "rgba(124,91,240,0.03)" }}>
-                  {t}
-                </button>
-              ))}
-            </div>
-
-            <AnimatePresence mode="wait">
-              <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
-                <Accordion className="mt-6">
-                  {(faqs[tab] || []).map((f, i) => (
-                    <AccordionItem key={i} value={`item-${i}`}>
-                      <AccordionTrigger className="text-left font-medium">{f.q}</AccordionTrigger>
-                      <AccordionContent className="text-gray-500">{f.a}</AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </motion.div>
-            </AnimatePresence>
+        </div>
+        <div className="mt-8 rounded-[28px] border border-black/8 bg-[#fcfbff] p-4 sm:p-6">
+          <div className="flex flex-wrap gap-2">
+            {tabs.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={cn("rounded-full px-4 py-2 text-sm font-medium transition-all duration-200", tab === t ? "text-white shadow-md" : "border text-gray-600 hover:bg-gray-100")}
+                style={tab === t ? { background: "var(--landing-accent)" } : { borderColor: "rgba(0,0,0,0.08)", background: "rgba(124,91,240,0.03)" }}
+              >
+                {t}
+              </button>
+            ))}
           </div>
 
-          {/* contact card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-3xl text-white p-8 h-fit sticky top-24" style={{ background: "#1a1a2e" }}>
-            <div className="h-12 w-12 rounded-2xl flex items-center justify-center mb-6" style={{ background: "rgba(124,91,240,0.2)" }}>
-              <MessageSquare className="h-6 w-6" style={{ color: "var(--landing-accent)" }} />
-            </div>
-            <h3 className="text-xl font-bold font-heading">Still have doubts?</h3>
-            <p className="text-white/45 text-sm mt-2">15-min AI coaching session. It remembers everything.</p>
-            <Link href="/login"><Button className="rounded-full bg-white text-gray-950 hover:bg-white/90 mt-6 w-full">Talk to AI Coach <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
-            <div className="flex items-center gap-2 mt-4"><div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /><span className="text-xs text-white/40">Always available, 24/7</span></div>
-          </motion.div>
+          <AnimatePresence mode="wait">
+            <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
+              <Accordion type="single" collapsible className="mt-6 rounded-2xl border border-black/8 bg-white px-5 sm:px-6">
+                {(faqs[tab] || []).map((f, i) => (
+                  <AccordionItem key={i} value={`item-${i}`} className="py-2">
+                    <AccordionTrigger className="gap-4 py-4 text-left text-base font-medium text-gray-900 hover:no-underline">{f.q}</AccordionTrigger>
+                    <AccordionContent className="pb-4 pr-8 text-[15px] leading-7 text-gray-500">{f.a}</AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>
@@ -967,3 +972,4 @@ function Footer() {
     </footer>
   );
 }
+
