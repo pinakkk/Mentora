@@ -47,6 +47,25 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.09 } },
 };
 
+function SectionEyebrow({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-block text-[11px] font-semibold uppercase tracking-[0.28em] text-[#6f58d9] sm:text-xs",
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
 /* ── animated counter ────────────────────────────────────── */
 function useAnimatedCounter(target: number, duration = 2000) {
   const [count, setCount] = useState(0);
@@ -218,10 +237,7 @@ function HeroSection() {
             {/* Left ─ copy */}
             <motion.div initial="hidden" animate="visible" variants={stagger} className="space-y-7">
               <motion.div variants={fadeUp}>
-                <span className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs sm:text-sm font-medium tracking-wide uppercase" style={{ borderColor: "rgba(124,91,240,0.2)", color: "var(--landing-accent)", background: "rgba(124,91,240,0.06)" }}>
-                  <span className="h-2 w-2 rounded-full animate-pulse" style={{ background: "var(--landing-accent)" }} />
-                  AI-powered Career Coach
-                </span>
+                <SectionEyebrow>AI-powered Career Coach</SectionEyebrow>
               </motion.div>
 
               <motion.h1 variants={fadeUp} className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-gray-900">
@@ -286,9 +302,6 @@ function HeroSection() {
                       <p className="font-semibold text-sm text-gray-900">PlaceAI Coach</p>
                       <div className="flex items-center gap-1.5"><div className="h-1.5 w-1.5 rounded-full bg-emerald-400" /><p className="text-xs text-gray-400">Online now</p></div>
                     </div>
-                    <span className="ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium border" style={{ borderColor: "rgba(124,91,240,0.15)", color: "var(--landing-accent)", background: "rgba(124,91,240,0.05)" }}>
-                      <Sparkles className="h-3 w-3" /> Context-aware
-                    </span>
                   </div>
                   {/* messages */}
                   <div className="space-y-3 min-h-[190px]">
@@ -308,9 +321,6 @@ function HeroSection() {
                 </div>
               </TiltCard>
 
-              {/* decorative blobs */}
-              <motion.div className="absolute -top-4 -right-4 h-20 w-20 rounded-2xl border" style={{ borderColor: "rgba(124,91,240,0.12)", background: "linear-gradient(135deg,rgba(124,91,240,0.08),transparent)" }} animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
-              <motion.div className="absolute -bottom-6 -left-6 h-16 w-16 rounded-full border" style={{ borderColor: "rgba(124,91,240,0.12)", background: "linear-gradient(135deg,rgba(167,139,250,0.08),transparent)" }} animate={{ y: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
             </motion.div>
           </div>
         </div>
@@ -373,9 +383,7 @@ function PlatformOverview() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center space-y-4 mb-16 sm:mb-20">
           <motion.div variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium border" style={{ borderColor: "rgba(124,91,240,0.2)", color: "var(--landing-accent)", background: "rgba(124,91,240,0.06)" }}>
-              <span className="h-2 w-2 rounded-full" style={{ background: "var(--landing-accent)" }} /> Platform Overview
-            </span>
+            <SectionEyebrow>Platform Overview</SectionEyebrow>
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
             Ethical AI Coaching, Built for
@@ -414,9 +422,7 @@ function PlatformOverview() {
           <TiltCard className="h-full">
             <div className="rounded-2xl p-6 sm:p-8 border h-full flex flex-col" style={{ background: "white", borderColor: "rgba(0,0,0,0.06)" }}>
               <div className="flex items-center gap-2 mb-6">
-                <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border" style={{ borderColor: "rgba(124,91,240,0.2)", color: "var(--landing-accent)", background: "rgba(124,91,240,0.06)" }}>
-                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--landing-accent)" }} /> Live Preview
-                </span>
+                <SectionEyebrow className="tracking-[0.22em]">Live Preview</SectionEyebrow>
               </div>
 
               <AnimatePresence mode="wait">
@@ -505,9 +511,7 @@ function PainPointsSection() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-14 sm:mb-16">
           <motion.div variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium border" style={{ borderColor: "rgba(124,91,240,0.2)", color: "var(--landing-accent)", background: "rgba(124,91,240,0.06)" }}>
-              <span className="h-2 w-2 rounded-full" style={{ background: "var(--landing-accent)" }} /> How We Help
-            </span>
+            <SectionEyebrow>How We Help</SectionEyebrow>
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mt-4">
             We Solve Your Placement<br /><span className="italic">Struggles</span>
@@ -555,9 +559,7 @@ function HowItWorksSection() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-16 sm:mb-20">
           <motion.div variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium border" style={{ borderColor: "rgba(124,91,240,0.2)", color: "var(--landing-accent)", background: "rgba(124,91,240,0.06)" }}>
-              <span className="h-2 w-2 rounded-full" style={{ background: "var(--landing-accent)" }} /> How It Works
-            </span>
+            <SectionEyebrow>How It Works</SectionEyebrow>
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mt-4">
             Three Simple Steps<br />to <span className="italic">Get Placed</span>
@@ -626,9 +628,7 @@ function TestimonialsSection() {
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="flex flex-col md:flex-row md:items-end md:justify-between mb-14 sm:mb-16 gap-6">
           <div>
             <motion.div variants={fadeUp}>
-              <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium border mb-4" style={{ borderColor: "rgba(124,91,240,0.2)", color: "var(--landing-accent)", background: "rgba(124,91,240,0.06)" }}>
-                <span className="h-2 w-2 rounded-full" style={{ background: "var(--landing-accent)" }} /> Success Stories
-              </span>
+              <SectionEyebrow className="mb-4">Success Stories</SectionEyebrow>
             </motion.div>
             <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
               500+ Students<br /><span className="italic">Landed Offers Faster</span>
@@ -675,9 +675,7 @@ function SolutionsSection() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-14 sm:mb-16">
           <motion.div variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium border" style={{ borderColor: "rgba(124,91,240,0.2)", color: "var(--landing-accent)", background: "rgba(124,91,240,0.06)" }}>
-              <span className="h-2 w-2 rounded-full" style={{ background: "var(--landing-accent)" }} /> Solutions
-            </span>
+            <SectionEyebrow>Solutions</SectionEyebrow>
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mt-4">
             Personalized AI Coaching That<br /><span className="italic">Scales From One to Many</span>
@@ -760,9 +758,7 @@ function FAQSection() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <div className="grid lg:grid-cols-[1fr,360px] gap-12 lg:gap-16">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium border mb-4" style={{ borderColor: "rgba(124,91,240,0.2)", color: "var(--landing-accent)", background: "rgba(124,91,240,0.06)" }}>
-              <span className="h-2 w-2 rounded-full" style={{ background: "var(--landing-accent)" }} /> FAQ
-            </span>
+            <SectionEyebrow className="mb-4">FAQ</SectionEyebrow>
             <h2 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight">Got Questions?<br /><span className="italic">We&apos;ve Got Answers</span></h2>
             <p className="text-gray-500 mt-3 max-w-lg">Can&apos;t find what you&apos;re looking for? Chat with our AI coach — always online.</p>
 
@@ -816,9 +812,7 @@ function CTASection() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6 text-center relative z-10">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="space-y-8">
           <motion.div variants={fadeUp}>
-            <span className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium border" style={{ borderColor: "rgba(124,91,240,0.2)", color: "var(--landing-accent)", background: "rgba(124,91,240,0.06)" }}>
-              <span className="h-2 w-2 rounded-full" style={{ background: "var(--landing-accent)" }} /> Get Started Today
-            </span>
+            <SectionEyebrow>Get Started Today</SectionEyebrow>
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight">
             Ready to Land Your<br /><span className="italic">Dream Placement?</span>

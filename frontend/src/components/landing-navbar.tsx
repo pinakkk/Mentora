@@ -88,8 +88,8 @@ export default function LandingNavbar() {
   const ctaCls = useMemo(
     () =>
       theme === "dark"
-        ? "bg-white text-gray-950 hover:bg-white/90 shadow-sm ring-1 ring-white/15"
-        : "bg-gray-950 text-white hover:bg-gray-800 shadow-sm ring-1 ring-black/10",
+        ? "bg-[#8b72f6] text-white hover:bg-[#7a5ff0] shadow-lg shadow-[#8b72f6]/25 ring-1 ring-white/10"
+        : "bg-[#8b72f6] text-white hover:bg-[#7a5ff0] shadow-lg shadow-[#8b72f6]/20 ring-1 ring-[#7a5ff0]/10",
     [theme],
   );
 
@@ -106,11 +106,7 @@ export default function LandingNavbar() {
         )}
       >
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 pl-4 pr-3">
-            <div
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ background: "var(--landing-accent)" }}
-            />
+          <Link href="/" className="flex items-center pl-4 pr-3">
             <span className="font-heading text-lg font-semibold tracking-tight">
               PlaceAI
             </span>
