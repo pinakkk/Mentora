@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaceAI — Agentic AI Career Coach</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#fcfbf9] text-neutral-900 antialiased selection:bg-neutral-200">
+
+    <!-- Header / Hero Section -->
+    <header class="pt-24 pb-16 max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start border-b border-neutral-200 pb-16">
+            <div class="lg:col-span-8">
+                <h1 class="text-5xl md:text-7xl font-semibold tracking-tight text-neutral-900 mb-6">PlaceAI</h1>
+                <p class="text-2xl md:text-3xl font-medium tracking-tight text-neutral-600 mb-8">Agentic AI Career Coach: Final Blueprint</p>
+                <div class="flex items-center gap-2 text-sm font-medium text-neutral-500 uppercase tracking-wider">
+                    <i data-lucide="book-open" class="w-4 h-4" stroke-width="1.5"></i> Documentation
+                </div>
+            </div>
+            
+            <div class="lg:col-span-4 bg-white border border-neutral-200 rounded-2xl p-6 lg:p-8 shadow-sm">
+                <div class="space-y-6 text-base text-neutral-600">
+                    <div>
+                        <span class="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-1">Project</span>
+                        <span class="font-medium text-neutral-900 text-lg">PlaceAI — Your AI Placement Mentor</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-1">Problem Statement</span>
+                        <span class="text-neutral-800">PS2 — Agentic AI Career Coach (with PS1 hybrid features)</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-1">Stack</span>
+                        <span class="text-neutral-800">Next.js 15, Supabase pgvector, Claude API, Vercel AI SDK</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-1">Date</span>
+                        <span class="text-neutral-800">April 2026</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-6 lg:px-8 py-12 pb-32">
+
+        <!-- Table of Contents -->
+        <nav class="mb-20 bg-neutral-50 rounded-2xl p-8 border border-neutral-200">
+            <h2 class="text-xl font-semibold tracking-tight mb-6 flex items-center gap-2">
+                <i data-lucide="list" class="w-5 h-5 text-neutral-400" stroke-width="1.5"></i> Table of Contents
+            </h2>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-lg text-neutral-600">
+                <li><a href="#vision" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">01.</span> Vision & Value Proposition</a></li>
+                <li><a href="#features" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">02.</span> Feature Map — Core + Bonus</a></li>
+                <li><a href="#architecture" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">03.</span> Agentic AI Architecture</a></li>
+                <li><a href="#tech" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">04.</span> Technical & System Design</a></li>
+                <li><a href="#memory" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">05.</span> Memory & RAG Architecture</a></li>
+                <li><a href="#schema" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">06.</span> Database Schema</a></li>
+                <li><a href="#api" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">07.</span> API Endpoints</a></li>
+                <li><a href="#frontend" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">08.</span> Frontend Architecture</a></li>
+                <li><a href="#flow" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">09.</span> System Flow Diagrams</a></li>
+                <li><a href="#deployment" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">10.</span> Deployment Strategy</a></li>
+                <li><a href="#demo" class="hover:text-neutral-900 transition-colors flex items-center gap-2"><span class="text-neutral-400 text-sm">11.</span> Demo Script</a></li>
+            </ul>
+        </nav>
+
+        <!-- Section 1 -->
+        <section id="vision" class="mb-20">
+            <h2 class="text-3xl font-semibold tracking-tight text-neutral-900 mb-8 pb-4 border-b border-neutral-200">1. Vision & Value Proposition</h2>
+            
+            <h3 class="text-2xl font-semibold tracking-tight text-neutral-800 mt-10 mb-4">The Problem</h3>
+            <p class="text-lg leading-relaxed text-neutral-700 mb-6">
+                Students receive <span class="font-medium text-neutral-900">generic, stateless, reactive</span> career guidance. Every existing tool (VMock, Jobscan, ChatGPT) falls into one of two traps:
+            </p>
+            <ul class="list-disc pl-6 mb-8 space-y-3 text-lg text-neutral-700">
+                <li><span class="font-medium text-neutral-900">The "Tool" Trap:</span> Does ONE thing (resume scoring, speech analysis) but doesn't connect the dots.</li>
+                <li><span class="font-medium text-neutral-900">The "Chatbot" Trap:</span> Answers questions but never INITIATES, never REMEMBERS, never DECIDES.</li>
+            </ul>
+
+            <p class="text-lg leading-relaxed text-neutral-700 mb-6">
+                No tool acts like a <span class="font-medium text-neutral-900">real mentor</span> who: remembers your entire history, proactively checks on your progress, adjusts plans based on performance, holds you accountable, makes strategic decisions, and escalates when you're in trouble.
+            </p>
+
+            <h3 class="text-2xl font-semibold tracking-tight text-neutral-800 mt-12 mb-4">The Solution: PlaceAI</h3>
+            <p class="text-lg leading-relaxed text-neutral-700 mb-8">
+                An <span class="font-medium text-neutral-900">Agentic AI Career Coach</span> powered by 6 specialized agents that collaborate through shared memory. The AI doesn't just respond — it <span class="font-medium text-neutral-900">thinks, decides, and acts autonomously</span>.
+            </p>
+
+            <h3 class="text-2xl font-semibold tracking-tight text-neutral-800 mt-12 mb-6">What Makes This Different</h3>
+            <div class="overflow-x-auto rounded-xl border border-neutral-200 mb-12">
+                <table class="w-full text-left text-base whitespace-nowrap">
+                    <thead class="bg-neutral-50 border-b border-neutral-200 text-neutral-800 font-medium">
+                        <tr>
+                            <th class="px-5 py-4 font-semibold tracking-tight">Capability</th>
+                            <th class="px-5 py-4 font-semibold tracking-tight text-neutral-500">ChatGPT</th>
+                            <th class="px-5 py-4 font-semibold tracking-tight text-neutral-500">VMock</th>
+                            <th class="px-5 py-4 font-semibold tracking-tight text-neutral-500">Big Interview</th>
+                            <th class="px-5 py-4 font-semibold tracking-tight text-neutral-900 bg-white">PlaceAI</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-100 text-neutral-600 bg-white">
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">Memory across sessions</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 font-medium text-neutral-900">Full 3-layer memory</td></tr>
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">Proactive outreach</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 font-medium text-neutral-900">Autonomous nudges</td></tr>
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">Multi-agent decisions</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 font-medium text-neutral-900">6 specialized agents</td></tr>
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">Personalized planning</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 font-medium text-neutral-900">Adaptive 2/4/8-wk plans</td></tr>
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">Mock interviews</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-500">Fixed banks</td><td class="px-5 py-4 font-medium text-neutral-900">Adaptive, company-specific</td></tr>
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">TPC integration</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 font-medium text-neutral-900">Escalation + admin dash</td></tr>
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">Accountability</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 text-neutral-400">None</td><td class="px-5 py-4 font-medium text-neutral-900">Follow-up + reprioritization</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section id="features" class="mb-20">
+            <h2 class="text-3xl font-semibold tracking-tight text-neutral-900 mb-8 pb-4 border-b border-neutral-200">2. Feature Map</h2>
+            
+            <h3 class="text-2xl font-semibold tracking-tight text-neutral-800 mt-8 mb-6">Core Features (PS2)</h3>
+            <div class="space-y-4">
+                <!-- Feature Items -->
+                <div class="flex flex-col md:flex-row gap-4 p-5 rounded-xl border border-neutral-200 bg-white">
+                    <div class="w-12 h-12 flex-shrink-0 bg-neutral-100 rounded-lg flex items-center justify-center text-neutral-500 font-medium">F1</div>
+                    <div>
+                        <h4 class="text-lg font-medium text-neutral-900 mb-1">Resume Deep Dive</h4>
+                        <p class="text-neutral-600 text-base mb-2">Upload resume -> AI extracts skills, gaps, strengths -> creates initial profile.</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700">Diagnostic Agent</span>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4 p-5 rounded-xl border border-neutral-200 bg-white">
+                    <div class="w-12 h-12 flex-shrink-0 bg-neutral-100 rounded-lg flex items-center justify-center text-neutral-500 font-medium">F4</div>
+                    <div>
+                        <h4 class="text-lg font-medium text-neutral-900 mb-1">Personalized Prep Plan</h4>
+                        <p class="text-neutral-600 text-base mb-2">2-week / 4-week / 8-week plans mapped to target company requirements.</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700">Planner Agent</span>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4 p-5 rounded-xl border border-neutral-200 bg-white">
+                    <div class="w-12 h-12 flex-shrink-0 bg-neutral-100 rounded-lg flex items-center justify-center text-neutral-500 font-medium">F6</div>
+                    <div>
+                        <h4 class="text-lg font-medium text-neutral-900 mb-1">Coaching Chat with Memory</h4>
+                        <p class="text-neutral-600 text-base mb-2">Multi-turn conversations where AI recalls past sessions, makes decisions, assigns tasks.</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700">All Agents via Orchestrator</span>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4 p-5 rounded-xl border border-neutral-200 bg-white">
+                    <div class="w-12 h-12 flex-shrink-0 bg-neutral-100 rounded-lg flex items-center justify-center text-neutral-500 font-medium">F9</div>
+                    <div>
+                        <h4 class="text-lg font-medium text-neutral-900 mb-1">TPC Escalation</h4>
+                        <p class="text-neutral-600 text-base mb-2">When student is at risk (missed 3+ deadlines, declining scores), alert TPC with full context.</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700">Escalation Agent</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-lg text-neutral-500 mt-6 italic">* Additional features include Github Audits, Skill Gap Detection, Adaptive Mocks, Proactive Nudges, Coach's Notebook, and Dashboard.*</p>
+        </section>
+
+        <!-- Section 3 -->
+        <section id="architecture" class="mb-20">
+            <h2 class="text-3xl font-semibold tracking-tight text-neutral-900 mb-8 pb-4 border-b border-neutral-200">3. Agentic AI Architecture</h2>
+            
+            <h3 class="text-2xl font-semibold tracking-tight text-neutral-800 mt-8 mb-6">3.1 The 6 Agents</h3>
+            
+            <!-- System Diagram (ASCII wrapped beautifully) -->
+            <div class="bg-[#111] text-[#a0a0a0] rounded-2xl overflow-hidden mb-12 shadow-sm border border-neutral-200/20">
+                <div class="px-6 py-4 border-b border-neutral-800 flex items-center gap-3">
+                    <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
+                    <span class="text-xs font-medium text-neutral-400 ml-2 uppercase tracking-widest">Architecture Map</span>
+                </div>
+                <pre class="p-8 overflow-x-auto text-sm font-mono leading-relaxed selection:bg-neutral-800"><code>                        ┌──────────────────────────────────┐
+                        │        AGENT ORCHESTRATOR        │
+                        │                                  │
+                        │  - Routes events to agents       │
+                        │  - Manages hand-offs & limits    │
+                        │  - Maintains agent context       │
+                        └──────────┬───────────────────────┘
+                                   │
+         ┌─────────────────────────┼─────────────────────────┐
+         │                         │                         │
+   ┌─────▼──────┐          ┌──────▼──────┐          ┌──────▼───────┐
+   │ DIAGNOSTIC │          │   PLANNER   │          │ACCOUNTABILITY│
+   │   AGENT    │          │    AGENT    │          │    AGENT     │
+   └────────────┘          └─────────────┘          └──────────────┘
+         │                         │                         │
+   ┌─────▼──────┐          ┌──────▼──────┐          ┌──────▼───────┐
+   │   MOCK     │          │ ESCALATION  │          │   MEMORY     │
+   │ INTERVIEW  │          │    AGENT    │          │    AGENT     │
+   └────────────┘          └─────────────┘          └──────────────┘
+         │                         │                         │
+         └─────────────────────────┼─────────────────────────┘
+                                   │
+                        ┌──────────▼───────────────────────┐
+                        │        SHARED MEMORY STORE       │
+                        │  Supabase PostgreSQL + pgvector  │
+                        └──────────────────────────────────┘</code></pre>
+            </div>
+
+            <h3 class="text-2xl font-semibold tracking-tight text-neutral-800 mt-12 mb-6">3.2 Agent Specifications</h3>
+            
+            <!-- Agent 1 -->
+            <div class="mb-10">
+                <h4 class="text-xl font-medium tracking-tight text-neutral-900 mb-4 flex items-center gap-2">
+                    <i data-lucide="cpu" class="w-5 h-5 text-neutral-500" stroke-width="1.5"></i> Diagnostic Agent
+                </h4>
+                <p class="text-lg text-neutral-700 mb-4"><strong class="font-medium">Purpose:</strong> Comprehensive student profiling — the "intake specialist"</p>
+                
+                <div class="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-base">
+                        <tbody class="divide-y divide-neutral-100">
+                            <tr><td class="px-5 py-3 w-1/4 font-medium text-neutral-900 bg-neutral-50/50">Trigger</td><td class="px-5 py-3 text-neutral-700">Resume upload, GitHub/LinkedIn submission, onboarding</td></tr>
+                            <tr><td class="px-5 py-3 font-medium text-neutral-900 bg-neutral-50/50">Tools</td><td class="px-5 py-3 text-neutral-600 font-mono text-sm">parse_resume, analyze_github, extract_skills</td></tr>
+                            <tr><td class="px-5 py-3 font-medium text-neutral-900 bg-neutral-50/50">Behavior</td><td class="px-5 py-3 text-neutral-700">Doesn't trust self-reported skills — verifies via micro-tests. Flags inconsistencies.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Agent 2 -->
+            <div class="mb-10">
+                <h4 class="text-xl font-medium tracking-tight text-neutral-900 mb-4 flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-5 h-5 text-neutral-500" stroke-width="1.5"></i> Planner Agent
+                </h4>
+                <p class="text-lg text-neutral-700 mb-4"><strong class="font-medium">Purpose:</strong> Creates and maintains personalized preparation plans</p>
+                <div class="bg-[#f5f5f5] p-6 rounded-xl border border-neutral-200 font-mono text-sm leading-relaxed text-neutral-800 overflow-x-auto">
+                    <div class="font-semibold mb-2">PREP PLAN: 4-Week Sprint for Priya Sharma</div>
+                    <div class="text-neutral-500 mb-4">Target: Wipro (April 15), TCS (April 18), Amazon (May 1)</div>
+                    <div>WEEK 1: Foundation Repair</div>
+                    <div class="text-neutral-600">├── Day 1-2: Array & String patterns (Wipro focus)</div>
+                    <div class="text-neutral-600">├── Day 3-4: Tree traversals (weakness area)</div>
+                    <div class="text-neutral-600">└── Day 5: SQL basics crash course</div>
+                </div>
+            </div>
+
+             <!-- Agent 3 -->
+             <div class="mb-10">
+                <h4 class="text-xl font-medium tracking-tight text-neutral-900 mb-4 flex items-center gap-2">
+                    <i data-lucide="bell" class="w-5 h-5 text-neutral-500" stroke-width="1.5"></i> Accountability Agent
+                </h4>
+                <p class="text-lg text-neutral-700 mb-4"><strong class="font-medium">Purpose:</strong> Ensures students follow through on plans</p>
+                <p class="text-lg text-neutral-700 mb-4">Adapts strategy based on responsiveness. Tracks which nudge types work best (social proof, loss aversion, etc.).</p>
+            </div>
+
+        </section>
+
+        <!-- Section 4 -->
+        <section id="tech" class="mb-20">
+            <h2 class="text-3xl font-semibold tracking-tight text-neutral-900 mb-8 pb-4 border-b border-neutral-200">4. Technical Architecture</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                <div class="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h4 class="text-lg font-medium text-neutral-900 mb-4">Frontend / Framework</h4>
+                    <ul class="space-y-3 text-lg text-neutral-700">
+                        <li><strong class="font-medium">Framework:</strong> Next.js 15 (App Router)</li>
+                        <li><strong class="font-medium">Language:</strong> TypeScript</li>
+                        <li><strong class="font-medium">Styling:</strong> Tailwind CSS v4</li>
+                        <li><strong class="font-medium">Components:</strong> Custom local UI components</li>
+                    </ul>
+                </div>
+                <div class="bg-white border border-neutral-200 rounded-xl p-6">
+                    <h4 class="text-lg font-medium text-neutral-900 mb-4">Backend / Data</h4>
+                    <ul class="space-y-3 text-lg text-neutral-700">
+                        <li><strong class="font-medium">Database:</strong> Supabase (PostgreSQL)</li>
+                        <li><strong class="font-medium">Vector DB:</strong> Supabase pgvector</li>
+                        <li><strong class="font-medium">Cache/Queue:</strong> Upstash Redis</li>
+                        <li><strong class="font-medium">Auth:</strong> Supabase Auth</li>
+                    </ul>
+                </div>
+                <div class="bg-white border border-neutral-200 rounded-xl p-6 md:col-span-2">
+                    <h4 class="text-lg font-medium text-neutral-900 mb-4">AI Layer</h4>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-lg text-neutral-700">
+                        <li><strong class="font-medium">LLM:</strong> Claude Sonnet 4.6 (Agents)</li>
+                        <li><strong class="font-medium">Extraction:</strong> Claude Haiku 4.5</li>
+                        <li><strong class="font-medium">Embeddings:</strong> OpenAI text-embedding-3-small</li>
+                        <li><strong class="font-medium">SDK:</strong> Vercel AI SDK</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-semibold tracking-tight text-neutral-800 mt-12 mb-4">Why Custom Agents?</h3>
+            <p class="text-lg leading-relaxed text-neutral-700 mb-6">
+                Instead of LangChain or CrewAI, we build custom agent loops. This provides total control over reasoning, hand-offs, and shared memory, resulting in a system that is highly debuggable and explicitly tailored for educational coaching rather than general-purpose tasks.
+            </p>
+        </section>
+
+        <!-- Section 5 -->
+        <section id="memory" class="mb-20">
+            <h2 class="text-3xl font-semibold tracking-tight text-neutral-900 mb-8 pb-4 border-b border-neutral-200">5. Memory & RAG Architecture</h2>
+            
+            <p class="text-lg leading-relaxed text-neutral-700 mb-8">
+                The intelligence of PlaceAI relies entirely on a robust, multi-tiered memory system allowing agents to persist context across weeks of interaction.
+            </p>
+
+            <div class="space-y-6">
+                <div class="border border-neutral-200 rounded-xl p-6 bg-white flex gap-6 items-start">
+                    <div class="mt-1"><i data-lucide="zap" class="w-6 h-6 text-neutral-400" stroke-width="1.5"></i></div>
+                    <div>
+                        <h4 class="text-xl font-medium tracking-tight text-neutral-900 mb-2">Layer 1: Working Memory (Ephemeral)</h4>
+                        <p class="text-lg text-neutral-600">Current conversation messages, active tool call results, and injected context. Lives only for the duration of a single request.</p>
+                    </div>
+                </div>
+                
+                <div class="border border-neutral-200 rounded-xl p-6 bg-white flex gap-6 items-start">
+                    <div class="mt-1"><i data-lucide="history" class="w-6 h-6 text-neutral-400" stroke-width="1.5"></i></div>
+                    <div>
+                        <h4 class="text-xl font-medium tracking-tight text-neutral-900 mb-2">Layer 2: Episodic Memory (Recent)</h4>
+                        <p class="text-lg text-neutral-600">Last 5 conversation summaries, hot-cached facts, and recent task status. Stored in Upstash Redis with a 7-day TTL.</p>
+                    </div>
+                </div>
+
+                <div class="border border-neutral-200 rounded-xl p-6 bg-white flex gap-6 items-start">
+                    <div class="mt-1"><i data-lucide="database" class="w-6 h-6 text-neutral-400" stroke-width="1.5"></i></div>
+                    <div>
+                        <h4 class="text-xl font-medium tracking-tight text-neutral-900 mb-2">Layer 3: Semantic Memory (Long-term)</h4>
+                        <p class="text-lg text-neutral-600">All extracted facts (goals, skills, struggles, preferences) stored as vector embeddings in Supabase pgvector for semantic search and injection.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="text-2xl font-semibold tracking-tight text-neutral-800 mt-12 mb-6">Memory Injection Protocol</h3>
+            <div class="bg-neutral-900 text-neutral-300 p-6 rounded-xl font-mono text-sm leading-relaxed overflow-x-auto shadow-sm">
+<pre><code>SYSTEM PROMPT = base_agent_prompt + """
+## What You Know About This Student
+
+### Core Profile
+Name: Priya Sharma | Dept: CSE | CGPA: 8.4
+Target: Product companies
+
+### Key Facts (most relevant first)
+- [skill] Strong React/Node.js, building full-stack
+- [struggle] Consistently fails DP — 3 mock failures
+- [preference] Visual learner, morning study sessions
+
+### Pending Tasks
+- [ ] 5 STAR practice questions (due tomorrow)
+"""</code></pre>
+            </div>
+        </section>
+
+        <!-- Section 6 & 7 (Combined brevity for layout) -->
+        <section id="schema" class="mb-20">
+            <h2 class="text-3xl font-semibold tracking-tight text-neutral-900 mb-8 pb-4 border-b border-neutral-200">6. Data & API Infrastructure</h2>
+            
+            <h3 class="text-2xl font-semibold tracking-tight text-neutral-800 mt-8 mb-4">Core pgvector Schema</h3>
+            <div class="bg-white border border-neutral-200 rounded-xl overflow-hidden mb-8">
+                <pre class="p-6 overflow-x-auto text-sm font-mono leading-relaxed text-neutral-800"><code>CREATE TABLE memory_facts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID REFERENCES students(id),
+  fact TEXT NOT NULL,
+  category TEXT NOT NULL CHECK (category IN ('goal','skill','struggle',...)),
+  embedding vector(1536),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX ON memory_facts USING hnsw (embedding vector_cosine_ops);</code></pre>
+            </div>
+
+            <h3 class="text-2xl font-semibold tracking-tight text-neutral-800 mt-10 mb-4">API Route Structure (Next.js)</h3>
+            <ul class="space-y-4 text-lg text-neutral-700 font-mono text-sm">
+                <li class="flex items-center gap-4"><span class="bg-neutral-100 px-2 py-1 rounded text-neutral-800 font-medium w-16 text-center">POST</span> <span>/api/chat <span class="text-neutral-400 ml-2"># Streaming SSE agent loop</span></span></li>
+                <li class="flex items-center gap-4"><span class="bg-neutral-100 px-2 py-1 rounded text-neutral-800 font-medium w-16 text-center">POST</span> <span>/api/resume/analyze <span class="text-neutral-400 ml-2"># AI extraction</span></span></li>
+                <li class="flex items-center gap-4"><span class="bg-neutral-100 px-2 py-1 rounded text-neutral-800 font-medium w-16 text-center">GET</span> <span>/api/students/me/memory <span class="text-neutral-400 ml-2"># Coach's notebook data</span></span></li>
+                <li class="flex items-center gap-4"><span class="bg-neutral-100 px-2 py-1 rounded text-neutral-800 font-medium w-16 text-center">POST</span> <span>/api/agents/proactive <span class="text-neutral-400 ml-2"># Cron triggered nudges</span></span></li>
+            </ul>
+        </section>
+
+        <!-- Section 8 -->
+        <section id="frontend" class="mb-20">
+            <h2 class="text-3xl font-semibold tracking-tight text-neutral-900 mb-8 pb-4 border-b border-neutral-200">8. Frontend Architecture</h2>
+            <p class="text-lg leading-relaxed text-neutral-700 mb-6">
+                Built entirely with React Server Components, styled directly with Tailwind CSS, utilizing Framer Motion for micro-interactions (typing indicators, task completions).
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+                <div>
+                    <h4 class="text-xl font-medium tracking-tight text-neutral-900 mb-3">Student Interface</h4>
+                    <ul class="list-disc pl-5 space-y-2 text-lg text-neutral-600">
+                        <li>Streaming Chat (useChat)</li>
+                        <li>Inline Tool Action Cards</li>
+                        <li>Coach's Memory Sidebar</li>
+                        <li>Radar Charts for Skills</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xl font-medium tracking-tight text-neutral-900 mb-3">TPC Admin Dashboard</h4>
+                    <ul class="list-disc pl-5 space-y-2 text-lg text-neutral-600">
+                        <li>Skill-Market Gap Heatmaps</li>
+                        <li>Real-time Escalation Alerts</li>
+                        <li>AI Generated Batch Insights</li>
+                        <li>Natural Language RAG Queries</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Sections -->
+        <section id="deployment" class="mb-10">
+            <h2 class="text-3xl font-semibold tracking-tight text-neutral-900 mb-8 pb-4 border-b border-neutral-200">10. Deployment Strategy</h2>
+            
+            <div class="overflow-x-auto rounded-xl border border-neutral-200">
+                <table class="w-full text-left text-base whitespace-nowrap">
+                    <thead class="bg-neutral-50 border-b border-neutral-200 text-neutral-800 font-medium">
+                        <tr>
+                            <th class="px-5 py-4">Service</th>
+                            <th class="px-5 py-4">Purpose</th>
+                            <th class="px-5 py-4">Tier</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-100 text-neutral-600 bg-white">
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">Vercel</td><td class="px-5 py-4">Next.js Edge hosting</td><td class="px-5 py-4">Hobby (Free)</td></tr>
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">Supabase</td><td class="px-5 py-4">Postgres + pgvector + Auth</td><td class="px-5 py-4">Free Tier</td></tr>
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">Upstash Redis</td><td class="px-5 py-4">Caching & Queue</td><td class="px-5 py-4">Free Tier</td></tr>
+                        <tr><td class="px-5 py-4 font-medium text-neutral-800">Anthropic API</td><td class="px-5 py-4">Claude Sonnet/Haiku</td><td class="px-5 py-4">Pay-per-use</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Footer Note -->
+        <div class="mt-24 pt-8 border-t border-neutral-200 text-center text-neutral-500 text-base">
+            <p>This blueprint is the complete technical specification for PlaceAI.</p>
+        </div>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
