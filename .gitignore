@@ -1,0 +1,12 @@
+.claude/
+.DS_Store
+node_modules/
+.next/
+.env
+.env.local
+*.tsbuildinfo
+frontend/.next/
+frontend/node_modules/
+frontend/src/generated/
+backend/node_modules/
+backend/dist/

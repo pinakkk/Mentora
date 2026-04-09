@@ -1,0 +1,305 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+// ─── ENUMS ───────────────────────────────────────────────
+
+enum Role {
+  student
+  tpc_admin
+}
+
+enum CompanyTier {
+  dream
+  regular
+  mass
+}
+
+enum ApplicationStatus {
+  applied
+  shortlisted
+  interview
+  offer
+  rejected
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum TaskCategory {
+  dsa
+  project
+  resume
+  mock
+  behavioral
+  aptitude
+  system_design
+  hr
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  completed
+}
+
+enum PlanStatus {
+  active
+  completed
+  abandoned
+}
+
+enum AssessmentType {
+  technical
+  behavioral
+  hr
+  system_design
+}
+
+enum MemoryCategory {
+  goal
+  skill
+  struggle
+  milestone
+  preference
+  behavioral
+}
+
+enum MemoryImportance {
+  high
+  medium
+  low
+}
+
+enum NudgeType {
+  reminder
+  opportunity
+  re_engage
+  celebrate
+}
+
+enum NudgeStatus {
+  sent
+  read
+  acted
+}
+
+enum AlertSeverity {
+  low
+  medium
+  high
+  critical
+}
+
+enum AlertStatus {
+  new_alert
+  acknowledged
+  resolved
+}
+
+// ─── MODELS ──────────────────────────────────────────────
+
+model Student {
+  id           String   @id @default(uuid()) @db.Uuid
+  authId       String   @unique @map("auth_id")
+  name         String
+  email        String   @unique
+  avatarUrl    String?  @map("avatar_url")
+  department   String?
+  cgpa         Float?
+  year         Int?
+  resumeUrl    String?  @map("resume_url")
+  githubUrl    String?  @map("github_url")
+  linkedinUrl  String?  @map("linkedin_url")
+  preferences  Json?    @default("{}")
+  skills       Json?    @default("[]")
+  readiness    Float?   @default(0)
+  role         Role     @default(student)
+  onboarded    Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  memoryFacts    MemoryFact[]
+  tasks          Task[]
+  prepPlans      PrepPlan[]
+  assessments    Assessment[]
+  conversations  Conversation[]
+  nudges         Nudge[]
+  tpcAlerts      TPCAlert[]
+  applications   Application[]
+
+  @@map("students")
+}
+
+model Company {
+  id               String      @id @default(uuid()) @db.Uuid
+  name             String
+  description      String?
+  visitDate        DateTime?   @map("visit_date")
+  deadline         DateTime?
+  tier             CompanyTier @default(regular)
+  roles            Json?       @default("[]")
+  jdText           String?     @map("jd_text")
+  interviewPattern Json?       @map("interview_pattern")
+  historicalData   Json?       @map("historical_data")
+  jdEmbedding      Unsupported("vector(1536)")? @map("jd_embedding")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  requirements     CompanyRequirement[]
+  assessments      Assessment[]
+  applications     Application[]
+
+  @@map("companies")
+}
+
+model CompanyRequirement {
+  id         String                          @id @default(uuid()) @db.Uuid
+  companyId  String                          @map("company_id") @db.Uuid
+  skill      String
+  priority   String                          @default("required")
+  minLevel   Int                             @default(5) @map("min_level")
+  embedding  Unsupported("vector(1536)")?
+  createdAt  DateTime                        @default(now()) @map("created_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("company_requirements")
+}
+
+model Application {
+  id             String            @id @default(uuid()) @db.Uuid
+  studentId      String            @map("student_id") @db.Uuid
+  companyId      String            @map("company_id") @db.Uuid
+  matchScore     Float?            @map("match_score")
+  scoreBreakdown Json?             @map("score_breakdown")
+  status         ApplicationStatus @default(applied)
+  appliedAt      DateTime          @default(now()) @map("applied_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, companyId])
+  @@map("applications")
+}
+
+model MemoryFact {
+  id         String           @id @default(uuid()) @db.Uuid
+  studentId  String           @map("student_id") @db.Uuid
+  fact       String
+  category   MemoryCategory
+  importance MemoryImportance @default(medium)
+  embedding  Unsupported("vector(1536)")?
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("memory_facts")
+}
+
+model Task {
+  id          String       @id @default(uuid()) @db.Uuid
+  studentId   String       @map("student_id") @db.Uuid
+  title       String
+  description String?
+  deadline    DateTime?
+  priority    TaskPriority @default(medium)
+  category    TaskCategory @default(dsa)
+  status      TaskStatus   @default(pending)
+  metadata    Json?        @default("{}")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("tasks")
+}
+
+model PrepPlan {
+  id              String     @id @default(uuid()) @db.Uuid
+  studentId       String     @map("student_id") @db.Uuid
+  targetCompanies Json?      @map("target_companies") @default("[]")
+  durationWeeks   Int        @map("duration_weeks") @default(4)
+  phases          Json?      @default("[]")
+  currentPhase    Int        @default(1) @map("current_phase")
+  status          PlanStatus @default(active)
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("prep_plans")
+}
+
+model Assessment {
+  id           String         @id @default(uuid()) @db.Uuid
+  studentId    String         @map("student_id") @db.Uuid
+  companyId    String?        @map("company_id") @db.Uuid
+  type         AssessmentType
+  questions    Json?          @default("[]")
+  answers      Json?          @default("[]")
+  scores       Json?          @default("{}")
+  feedback     String?
+  overallScore Float?         @map("overall_score")
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  student Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@map("assessments")
+}
+
+model Conversation {
+  id               String                          @id @default(uuid()) @db.Uuid
+  studentId        String                          @map("student_id") @db.Uuid
+  messages         Json?                           @default("[]")
+  summary          String?
+  summaryEmbedding Unsupported("vector(1536)")?    @map("summary_embedding")
+  agentType        String?                         @map("agent_type")
+  createdAt        DateTime                        @default(now()) @map("created_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("conversations")
+}
+
+model Nudge {
+  id        String      @id @default(uuid()) @db.Uuid
+  studentId String      @map("student_id") @db.Uuid
+  content   String
+  type      NudgeType   @default(reminder)
+  urgency   Int         @default(1)
+  status    NudgeStatus @default(sent)
+  sentAt    DateTime    @default(now()) @map("sent_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("nudges")
+}
+
+model TPCAlert {
+  id             String        @id @default(uuid()) @db.Uuid
+  studentId      String        @map("student_id") @db.Uuid
+  severity       AlertSeverity @default(medium)
+  pattern        String
+  context        Json?         @default("{}")
+  recommendation String?
+  status         AlertStatus   @default(new_alert)
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("tpc_alerts")
+}
