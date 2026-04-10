@@ -2,7 +2,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 
 // ─── MODEL TIERS ─────────────────────────────────────────
 //
-// Sonnet 4.6 (smart, expensive, via OpenRouter):
+// Sonnet 4 (smart, expensive, via OpenRouter):
 //     Coach reasoning, mock-interview, planning, resume diagnostic,
 //     escalation decisions.
 //
@@ -28,7 +28,7 @@ const groq = createOpenAI({
 });
 
 const SONNET_MODEL_ID =
-  process.env.OPENROUTER_SONNET_MODEL || "anthropic/claude-sonnet-4.6";
+  process.env.OPENROUTER_SONNET_MODEL || "anthropic/claude-sonnet-4";
 const FAST_MODEL_ID =
   process.env.GROQ_FAST_MODEL || "llama-3.3-70b-versatile";
 

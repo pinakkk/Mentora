@@ -48,7 +48,7 @@
 ### Cost optimization
 
 - [x] **Two-tier model routing**
-  - `src/lib/ai/provider.ts` exports `chatModel` (Sonnet 4.6 via OpenRouter)
+  - `src/lib/ai/provider.ts` exports `chatModel` (Sonnet 4 via OpenRouter)
     and `fastModel` (Llama 3.3 70B via Groq's OpenAI-compatible API).
   - Both model IDs env-overridable: `OPENROUTER_SONNET_MODEL`,
     `GROQ_FAST_MODEL`.
@@ -56,7 +56,7 @@
     `https://api.groq.com/openai/v1`, so the whole codebase keeps using the
     Vercel AI SDK (`generateText`, `streamText`, `wrapLanguageModel`, tool
     calls) without learning a second SDK.
-  - **Sonnet 4.6** stays on: Coach reasoning, mock interview generation,
+  - **Sonnet 4** stays on: Coach reasoning, mock interview generation,
     resume diagnostic, plan generation.
   - **Llama 3.3 70B** handles: `fact-extractor.ts`, `burnout-detector.ts`,
     `accountability.ts` (nudge text), `diagnostic/github`,
@@ -216,7 +216,7 @@ To get the new code fully working in production:
    CRON_SECRET=<random-32-char-string>
 
    # OPTIONAL — model overrides
-   OPENROUTER_SONNET_MODEL=anthropic/claude-sonnet-4.6
+   OPENROUTER_SONNET_MODEL=anthropic/claude-sonnet-4
    GROQ_FAST_MODEL=llama-3.3-70b-versatile
 
    # OPTIONAL — lifts GitHub API rate limit from 60 → 5000 req/hr

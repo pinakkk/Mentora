@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { getOrCreateStudent } from "@/server/db/students";
 
 const serviceClient = createServiceClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,27 +13,25 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: student } = await serviceClient
+  try {
+    // Ensure the row exists (race-safe). Then fetch the full record.
+    await getOrCreateStudent(user, {}, serviceClient);
+  } catch (err) {
+    console.error("Failed to create student:", err);
+    return NextResponse.json(
+      { error: "Failed to create student", details: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
+  }
+
+  const { data: student, error } = await serviceClient
     .from("students")
     .select("*")
     .eq("auth_id", user.id)
-    .single();
+    .maybeSingle();
 
-  if (!student) {
-    // Auto-create student record
-    const { data: newStudent } = await serviceClient
-      .from("students")
-      .insert({
-        id: crypto.randomUUID(),
-        auth_id: user.id,
-        name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Student",
-        email: user.email!,
-        avatar_url: user.user_metadata?.avatar_url,
-      })
-      .select()
-      .single();
-
-    return NextResponse.json(newStudent);
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
   return NextResponse.json(student);

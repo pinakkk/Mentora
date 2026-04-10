@@ -81,7 +81,7 @@ If at risk → Escalation Agent alerts TPC with full context
 | UI | Tailwind CSS v4 + custom UI components + Recharts + Framer Motion |
 | Database | Supabase (PostgreSQL + pgvector + Auth + Storage + Realtime) |
 | Cache | Upstash Redis |
-| AI Agents | Claude Sonnet 4.6 (Anthropic API) |
+| AI Agents | Claude Sonnet 4 (Anthropic API) |
 | AI Extraction | Claude Haiku 4.5 |
 | AI SDK | Vercel AI SDK (`ai` + `@ai-sdk/anthropic`) |
 | Embeddings | OpenAI text-embedding-3-small |

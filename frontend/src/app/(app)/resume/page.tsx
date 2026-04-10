@@ -1,6 +1,15 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/primitives/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload,
@@ -269,6 +278,8 @@ export default function ResumePage() {
   const [previousResumes, setPreviousResumes] = useState<ResumeFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAllResumes, setShowAllResumes] = useState(false);
+  const [resultDialogOpen, setResultDialogOpen] = useState(false);
+  const resultsRef = useRef<HTMLDivElement | null>(null);
 
   // Load existing data on mount
   useEffect(() => {
@@ -352,7 +363,13 @@ export default function ResumePage() {
         throw new Error(errData.error || "Analysis failed");
       }
       const result = await analyzeRes.json();
-      setAnalysis(result);
+      setAnalysis({
+        skills: result.skills || [],
+        readinessScore: result.readinessScore || 0,
+        strengths: result.strengths || [],
+        gaps: result.gaps || [],
+        recommendations: result.recommendations || [],
+      });
 
       const listRes = await fetch("/api/resume/list");
       if (listRes.ok) {
@@ -361,6 +378,14 @@ export default function ResumePage() {
       }
 
       setFile(null);
+      setResultDialogOpen(true);
+      toast.success("Resume analyzed", {
+        description: `Readiness score: ${Math.round(result.readinessScore || 0)}%`,
+      });
+      // Scroll the inline results into view once React commits the new state.
+      requestAnimationFrame(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -703,10 +728,11 @@ export default function ResumePage() {
         <AnimatePresence>
           {analysis && analysis.skills && analysis.skills.length > 0 && (
             <motion.div
+              ref={resultsRef}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="space-y-6"
+              className="space-y-6 scroll-mt-6"
             >
               <div>
                 <SectionEyebrow>Diagnostic Report</SectionEyebrow>
@@ -943,6 +969,105 @@ export default function ResumePage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* ── Result popup (auto-opens once analysis returns) ── */}
+      <Dialog open={resultDialogOpen} onOpenChange={setResultDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div
+                className="h-10 w-10 rounded-2xl flex items-center justify-center shadow-sm"
+                style={{ background: "linear-gradient(135deg,#10b981,#34d399)" }}
+              >
+                <CheckCircle2 className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <DialogTitle className="font-heading">
+                  Analysis complete
+                </DialogTitle>
+                <DialogDescription>
+                  Here&apos;s the snapshot — full report is below.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {analysis && (
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center justify-between p-4 rounded-2xl border bg-gradient-to-br from-emerald-50/60 to-transparent">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-700">
+                    Readiness
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 tabular-nums mt-1">
+                    {Math.round(analysis.readinessScore)}
+                    <span className="text-base text-gray-400 font-normal">/100</span>
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6f58d9]">
+                    Skills found
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 tabular-nums mt-1">
+                    {analysis.skills.length}
+                  </p>
+                </div>
+              </div>
+
+              {analysis.strengths.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-700 mb-2">
+                    Top strengths
+                  </p>
+                  <ul className="space-y-1.5">
+                    {analysis.strengths.slice(0, 3).map((s, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                        <span>{s}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {analysis.gaps.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-700 mb-2">
+                    Focus areas
+                  </p>
+                  <ul className="space-y-1.5">
+                    {analysis.gaps.slice(0, 3).map((g, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                        <TrendingUp className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
+                        <span>{g}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setResultDialogOpen(false)}
+              className="rounded-full"
+            >
+              View full report
+            </Button>
+            <a href="/plan" className="inline-flex">
+              <Button
+                className="rounded-full text-white shadow-md gap-2 w-full"
+                style={{ background: "linear-gradient(135deg,#10b981,#059669)" }}
+              >
+                Open prep plan
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </a>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
