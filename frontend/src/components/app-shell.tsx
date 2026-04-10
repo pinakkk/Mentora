@@ -15,7 +15,6 @@ import {
   LogOut,
   Menu,
   Bell,
-  Brain,
 } from "lucide-react";
 import { Button } from "@/components/primitives/button";
 import { Avatar, AvatarFallback } from "@/components/primitives/avatar";
@@ -60,11 +59,8 @@ function SidebarContent({
       <Link
         href="/dashboard"
         onClick={onNavigate}
-        className="flex items-center gap-3 px-3 mb-8"
+        className="flex items-center gap-2 px-3 mb-8"
       >
-        <div className="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center">
-          <Brain className="w-4.5 h-4.5 text-violet-400" />
-        </div>
         <span className="text-lg font-semibold text-white tracking-tight">
           PlaceAI
         </span>
@@ -83,7 +79,7 @@ function SidebarContent({
               onClick={onNavigate}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                 active
-                  ? "bg-violet-500 text-white shadow-sm font-medium"
+                  ? "bg-[#7c5bf0] text-white shadow-sm font-medium"
                   : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
               }`}
             >
@@ -105,7 +101,7 @@ function SidebarContent({
               onClick={onNavigate}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                 active
-                  ? "bg-violet-500 text-white shadow-sm font-medium"
+                  ? "bg-[#7c5bf0] text-white shadow-sm font-medium"
                   : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
               }`}
             >
@@ -119,7 +115,7 @@ function SidebarContent({
       <div className="mt-auto pt-4 border-t border-white/5">
         <div className="flex items-center gap-3 px-2">
           <Avatar className="h-9 w-9">
-            <AvatarFallback className="text-xs bg-violet-500/20 text-violet-300 font-medium">
+            <AvatarFallback className="text-xs bg-[#7c5bf0]/20 text-[#a78bfa] font-medium">
               {initials}
             </AvatarFallback>
           </Avatar>

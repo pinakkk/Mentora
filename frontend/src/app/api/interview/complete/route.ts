@@ -84,9 +84,11 @@ Return ONLY valid JSON (no markdown, no code fences):
   }
 
   // Save assessment to DB
+  const assessmentNow = new Date().toISOString();
   const { data: assessment, error: assessmentError } = await serviceClient
     .from("assessments")
     .insert({
+      id: crypto.randomUUID(),
       student_id: student.id,
       type: interviewType,
       questions: questions.map((q: { questionText: string; difficulty: string }) => ({
@@ -100,6 +102,7 @@ Return ONLY valid JSON (no markdown, no code fences):
       ),
       feedback: debrief.summary,
       overall_score: overallScore,
+      created_at: assessmentNow,
     })
     .select()
     .single();

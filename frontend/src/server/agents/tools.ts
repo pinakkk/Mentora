@@ -84,9 +84,11 @@ export function createCoachTools(studentId: string) {
         ]),
       }),
       execute: async ({ title, description, deadline, priority, category }) => {
+        const now = new Date().toISOString();
         const { data, error } = await supabase
           .from("tasks")
           .insert({
+            id: crypto.randomUUID(),
             student_id: studentId,
             title,
             description,
@@ -94,6 +96,8 @@ export function createCoachTools(studentId: string) {
             priority,
             category,
             status: "pending",
+            created_at: now,
+            updated_at: now,
           })
           .select()
           .single();
@@ -169,15 +173,19 @@ export function createCoachTools(studentId: string) {
           .describe("Plan phases with milestones"),
       }),
       execute: async ({ targetCompanies, durationWeeks, phases }) => {
+        const now = new Date().toISOString();
         const { data, error } = await supabase
           .from("prep_plans")
           .insert({
+            id: crypto.randomUUID(),
             student_id: studentId,
             target_companies: targetCompanies,
             duration_weeks: durationWeeks,
             phases,
             current_phase: 1,
             status: "active",
+            created_at: now,
+            updated_at: now,
           })
           .select()
           .single();
@@ -359,6 +367,7 @@ export function createCoachTools(studentId: string) {
         const { data, error } = await supabase
           .from("assessments")
           .insert({
+            id: crypto.randomUUID(),
             student_id: studentId,
             company_id: companyId || null,
             type,
@@ -367,6 +376,7 @@ export function createCoachTools(studentId: string) {
             scores,
             feedback,
             overall_score: overallScore,
+            created_at: new Date().toISOString(),
           })
           .select()
           .single();
@@ -392,11 +402,13 @@ export function createCoachTools(studentId: string) {
         const { data, error } = await supabase
           .from("tpc_alerts")
           .insert({
+            id: crypto.randomUUID(),
             student_id: studentId,
             severity,
             pattern,
             recommendation,
             status: "new_alert",
+            created_at: new Date().toISOString(),
           })
           .select()
           .single();

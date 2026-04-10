@@ -27,10 +27,10 @@ export function Timeline({ plan }: TimelineProps) {
           <div key={i} className="flex gap-4">
             <div className="flex flex-col items-center">
               {isCompleted ? (
-                <CheckCircle2 className="h-5 w-5 text-violet-500 shrink-0" />
+                <CheckCircle2 className="h-5 w-5 text-[#7c5bf0] shrink-0" />
               ) : isCurrent ? (
-                <div className="h-5 w-5 rounded-full border-2 border-violet-500 bg-violet-50 flex items-center justify-center shrink-0">
-                  <div className="h-2 w-2 rounded-full bg-violet-500" />
+                <div className="h-5 w-5 rounded-full border-2 border-[#7c5bf0] bg-[#7c5bf0]/10 flex items-center justify-center shrink-0">
+                  <div className="h-2 w-2 rounded-full bg-[#7c5bf0]" />
                 </div>
               ) : (
                 <div className="h-5 w-5 rounded-full border-2 border-gray-200 shrink-0" />
@@ -38,7 +38,7 @@ export function Timeline({ plan }: TimelineProps) {
               {i < plan.phases.length - 1 && (
                 <div
                   className={`w-0.5 flex-1 my-1 min-h-6 ${
-                    isCompleted ? "bg-violet-400" : "bg-gray-200"
+                    isCompleted ? "bg-[#a78bfa]" : "bg-gray-200"
                   }`}
                 />
               )}
@@ -48,7 +48,7 @@ export function Timeline({ plan }: TimelineProps) {
                 <h4
                   className={`text-sm font-medium ${
                     isCurrent
-                      ? "text-violet-600"
+                      ? "text-[#7c5bf0]"
                       : isCompleted
                       ? "text-gray-500"
                       : "text-gray-400"
@@ -57,7 +57,7 @@ export function Timeline({ plan }: TimelineProps) {
                   {phase.name}
                 </h4>
                 {isCurrent && (
-                  <span className="text-[10px] font-medium bg-violet-100 text-violet-600 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-medium bg-[#7c5bf0]/15 text-[#7c5bf0] px-2 py-0.5 rounded-full">
                     Current
                   </span>
                 )}

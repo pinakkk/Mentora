@@ -12,8 +12,10 @@ interface StatsCardsProps {
 }
 
 function getReadinessColor(score: number) {
-  if (score >= 70) return { text: "text-emerald-600", bg: "bg-emerald-50", ring: "ring-emerald-100" };
-  if (score >= 40) return { text: "text-amber-600", bg: "bg-amber-50", ring: "ring-amber-100" };
+  if (score >= 70)
+    return { text: "text-emerald-600", bg: "bg-emerald-50", ring: "ring-emerald-100" };
+  if (score >= 40)
+    return { text: "text-amber-600", bg: "bg-amber-50", ring: "ring-amber-100" };
   return { text: "text-red-500", bg: "bg-red-50", ring: "ring-red-100" };
 }
 
@@ -30,7 +32,12 @@ export function StatsCards({
     {
       label: "Readiness",
       value: `${readiness}%`,
-      sub: readiness >= 70 ? "Strong" : readiness >= 40 ? "Moderate" : "Needs work",
+      sub:
+        readiness >= 70
+          ? "Strong"
+          : readiness >= 40
+          ? "Moderate"
+          : "Needs work",
       icon: Gauge,
       iconColor: rc.text,
       iconBg: rc.bg,
@@ -50,9 +57,9 @@ export function StatsCards({
       value: mockInterviews.toString(),
       sub: mockInterviews > 0 ? "sessions completed" : "None yet",
       icon: Mic,
-      iconColor: "text-violet-600",
-      iconBg: "bg-violet-50",
-      ring: "ring-violet-100",
+      iconColor: "text-[#7c5bf0]",
+      iconBg: "bg-[#7c5bf0]/10",
+      ring: "ring-[#7c5bf0]/10",
     },
     {
       label: "Avg Score",
@@ -73,16 +80,16 @@ export function StatsCards({
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.08, duration: 0.4 }}
-          className="bg-white rounded-2xl p-4 lg:p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl p-4 lg:p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200 transition-all group"
         >
           <div className="flex items-start gap-3">
             <div
-              className={`h-10 w-10 rounded-xl ${stat.iconBg} ring-1 ${stat.ring} flex items-center justify-center flex-shrink-0`}
+              className={`h-10 w-10 rounded-xl ${stat.iconBg} ring-1 ${stat.ring} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}
             >
               <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
             </div>
             <div className="min-w-0">
-              <p className="text-xl lg:text-2xl font-bold tracking-tight">
+              <p className="text-xl lg:text-2xl font-bold tracking-tight text-gray-900">
                 {stat.value}
               </p>
               <p className="text-[11px] text-gray-400 mt-0.5">{stat.label}</p>

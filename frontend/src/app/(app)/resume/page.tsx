@@ -326,7 +326,7 @@ export default function ResumePage() {
                 ) : analyzing ? (
                   <>
                     <Brain className="h-4 w-4 animate-pulse mr-2" />
-                    Analyzing with AI...
+                    Analyzing & generating plan...
                   </>
                 ) : (
                   <>
@@ -646,6 +646,39 @@ export default function ResumePage() {
                   </div>
                 </CardContent>
               </Card>
+            )}
+            {analysis && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="border-emerald-200 bg-emerald-50/30">
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-lg bg-emerald-100 flex items-center justify-center">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-emerald-900">
+                          Prep plan auto-generated
+                        </p>
+                        <p className="text-xs text-emerald-600 mt-0.5">
+                          A personalized 4-week timeline was created from your
+                          resume
+                        </p>
+                      </div>
+                    </div>
+                    <a href="/plan">
+                      <Button
+                        size="sm"
+                        className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
+                      >
+                        View Plan
+                      </Button>
+                    </a>
+                  </CardContent>
+                </Card>
+              </motion.div>
             )}
           </motion.div>
         )}

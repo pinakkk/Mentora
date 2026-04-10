@@ -17,7 +17,7 @@ export function ReadinessGauge({
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
   const getColor = (s: number) => {
-    if (s >= 70) return "#8b5cf6";
+    if (s >= 70) return "#7c5bf0";
     if (s >= 40) return "#f97316";
     return "#ef4444";
   };

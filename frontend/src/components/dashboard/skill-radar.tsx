@@ -44,8 +44,8 @@ export function SkillRadar({ skills }: SkillRadarProps) {
         <Radar
           name="Skills"
           dataKey="level"
-          stroke="#8b5cf6"
-          fill="#8b5cf6"
+          stroke="#7c5bf0"
+          fill="#7c5bf0"
           fillOpacity={0.1}
           strokeWidth={2}
         />

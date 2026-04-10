@@ -111,20 +111,22 @@ Be honest but encouraging in your assessment.`,
     }
 
     // Update student profile with extracted skills and full analysis
+    const updatedPreferences = {
+      lastAnalysis: {
+        strengths: analysis.strengths,
+        gaps: analysis.gaps,
+        recommendations: analysis.recommendations,
+        analyzedAt: new Date().toISOString(),
+      },
+    };
+
     await serviceClient
       .from("students")
       .update({
         skills: analysis.skills,
         readiness: analysis.readinessScore,
         onboarded: true,
-        preferences: {
-          lastAnalysis: {
-            strengths: analysis.strengths,
-            gaps: analysis.gaps,
-            recommendations: analysis.recommendations,
-            analyzedAt: new Date().toISOString(),
-          },
-        },
+        preferences: updatedPreferences,
       })
       .eq("id", student.id);
 
@@ -162,6 +164,21 @@ Be honest but encouraging in your assessment.`,
       ]);
     } catch (memoryErr) {
       console.error("Memory storage error (non-fatal):", memoryErr);
+    }
+
+    // Auto-generate prep plan based on the latest analysis (non-blocking on failure)
+    try {
+      const { generatePlanForStudent } = await import(
+        "@/server/agents/plan-generator"
+      );
+      await generatePlanForStudent({
+        id: student.id,
+        skills: analysis.skills,
+        readiness: analysis.readinessScore,
+        preferences: updatedPreferences,
+      });
+    } catch (planErr) {
+      console.error("Auto plan generation error (non-fatal):", planErr);
     }
 
     return NextResponse.json(analysis);
