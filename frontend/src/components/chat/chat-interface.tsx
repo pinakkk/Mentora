@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { TextStreamChatTransport } from "ai";
 import { useRef, useEffect, useState, useMemo, useCallback } from "react";
-import { Send, Loader2, Paperclip, Sparkles } from "lucide-react";
+import { Send, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/primitives/button";
 import { ScrollArea } from "@/components/primitives/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/primitives/avatar";
@@ -126,7 +126,7 @@ export function ChatInterface({
 
   const [input, setInput] = useState("");
   const [loaded, setLoaded] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -177,11 +177,24 @@ export function ChatInterface({
     }
   }, [messages, status, loaded, saveMessages]);
 
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    const viewport = scrollAreaRef.current?.querySelector(
+      '[data-slot="scroll-area-viewport"]'
+    );
+    if (!(viewport instanceof HTMLDivElement)) return;
+    viewport.scrollTo({
+      top: viewport.scrollHeight,
+      behavior,
+    });
+  }, []);
+
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages, isLoading]);
+    const behavior = loaded ? "smooth" : "auto";
+    const frame = window.requestAnimationFrame(() => {
+      scrollToBottom(behavior);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [messages, isLoading, loaded, scrollToBottom]);
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -210,8 +223,11 @@ export function ChatInterface({
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      <ScrollArea className="flex-1 px-4 lg:px-6 py-6" ref={scrollRef}>
+    <div className="flex h-full min-h-0 flex-col bg-white">
+      <ScrollArea
+        className="flex-1 min-h-0 px-4 py-6 lg:px-6"
+        ref={scrollAreaRef}
+      >
         {loaded && messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center py-16">
             <div className="h-14 w-14 rounded-2xl bg-violet-50 flex items-center justify-center mb-4">
@@ -334,7 +350,7 @@ export function ChatInterface({
         </div>
       </ScrollArea>
 
-      <div className="border-t border-gray-100 bg-white p-4">
+      <div className="sticky bottom-0 z-10 border-t border-white/30 bg-white/10 px-4 pb-4 pt-3 backdrop-blur-xl supports-[backdrop-filter]:bg-white/10 lg:px-6">
         <form onSubmit={onSubmit} className="max-w-3xl mx-auto relative">
           <div className="relative flex items-end">
             <textarea
@@ -344,20 +360,14 @@ export function ChatInterface({
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
               rows={1}
-              className="w-full pl-4 pr-24 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-violet-300 focus:ring-1 focus:ring-violet-100 transition-all placeholder:text-gray-400 resize-none min-h-[44px] max-h-32"
+              className="w-full pl-4 pr-14 py-3 bg-white/65 border border-white/60 shadow-[0_10px_30px_rgba(15,23,42,0.08)] rounded-2xl text-sm outline-none backdrop-blur-md focus:border-violet-300/70 focus:ring-1 focus:ring-violet-100/80 transition-all placeholder:text-gray-500 resize-none min-h-[44px] max-h-32"
               style={{ fieldSizing: "content" } as React.CSSProperties}
             />
             <div className="absolute right-2 bottom-1.5 flex items-center gap-1">
-              <button
-                type="button"
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <Paperclip className="w-4 h-4" />
-              </button>
               <Button
                 type="submit"
                 size="icon"
-                className="h-8 w-8 rounded-lg bg-violet-500 hover:bg-violet-600 text-white shadow-sm disabled:opacity-40"
+                className="h-8 w-8 rounded-full bg-violet-500 hover:bg-violet-600 text-white shadow-sm disabled:opacity-40"
                 disabled={isLoading || !input.trim()}
               >
                 {isLoading ? (
@@ -369,7 +379,7 @@ export function ChatInterface({
             </div>
           </div>
         </form>
-        <p className="text-center text-[11px] text-gray-400 mt-2">
+        <p className="text-center text-[11px] text-gray-500 mt-2">
           PlaceAI remembers your conversations and acts autonomously
         </p>
       </div>

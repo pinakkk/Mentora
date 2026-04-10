@@ -173,10 +173,6 @@ export function AppShell({ user, children }: AppShellProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs text-gray-400 font-medium hidden sm:inline">AI Active</span>
-            </div>
             <button className="relative text-gray-400 hover:text-gray-600 transition-colors">
               <Bell className="h-5 w-5" />
               <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
