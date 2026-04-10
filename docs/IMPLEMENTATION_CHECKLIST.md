@@ -100,9 +100,9 @@
 | F4 | Personalized Prep Plan | ✅ | Pre-existing `plan-generator.ts`, unchanged. |
 | F5 | Adaptive Mock Interviews | ✅ | Pre-existing routes; rate-limited now. (Real-time difficulty adaptation still pending — see Remaining.) |
 | F6 | Coaching Chat with Memory | ✅ | Now consumes the full 3-layer memory + emotional state. |
-| F7 | Proactive Nudges | ✅ | `/api/cron/nudges` (Vercel Cron daily 09:00). Generates graduated L1/L2/L3 nudges. `/api/students/me/nudges` GET/PATCH for the in-app inbox. |
-| F8 | Task Tracking & Follow-up | ✅ | Accountability sweep detects overdue tasks and sends graduated nudges. |
-| F9 | TPC Escalation | ✅ | Auto-escalation to `tpc_alerts` when L3 hit; deduped to 1 alert per 72h per student. |
+| F7 | Proactive Nudges | ✅* | `/api/cron/nudges` route + accountability sweep + `/api/students/me/nudges` GET/PATCH inbox. *Auto-scheduling deferred — Vercel Cron requires Pro. Trigger manually with `Authorization: Bearer $CRON_SECRET` or wire to any external scheduler (cron-job.org, GitHub Actions, EasyCron). See "Remaining". |
+| F8 | Task Tracking & Follow-up | ✅* | Accountability sweep detects overdue tasks and sends graduated nudges. *Same caveat as F7 — runs on demand until a scheduler is wired. |
+| F9 | TPC Escalation | ✅* | Auto-escalation to `tpc_alerts` when L3 hit; deduped to 1 alert per 72h per student. *Same caveat as F7. |
 | F10 | Coach's Notebook | ✅ | Pre-existing, unchanged. |
 | F11 | Burnout & Emotion Detection | ✅ | New `src/server/agents/burnout-detector.ts`. Runs on every chat turn via `after()`, classifies into neutral/engaged/frustrated/anxious/burnout, stores in episodic state, auto-raises a TPC alert after 3 consecutive burnout turns. |
 | F12 | Progress Dashboard | ✅ | Pre-existing, unchanged. |
@@ -133,6 +133,16 @@
 - [ ] **Rename `middleware.ts` → `proxy.ts`** — Next 16 deprecates the
       `middleware` file convention. Build currently shows a deprecation
       warning. Pure rename, zero behavior change.
+- [ ] **Auto-schedule cron jobs** — `/api/cron/nudges` and
+      `/api/cron/accountability` are implemented and authenticated with
+      `CRON_SECRET`, but Vercel's free tier doesn't include Cron. Options
+      when ready:
+      1. Upgrade to Vercel Pro and re-add `vercel.json` with `crons[]`
+         (the old config is in git history).
+      2. Use a free external scheduler — `cron-job.org`, `EasyCron`, GitHub
+         Actions on a schedule, or Upstash QStash — to GET the routes with
+         the `Authorization: Bearer $CRON_SECRET` header.
+      Until then F7/F8/F9 still work on demand: `curl -H "Authorization: Bearer $CRON_SECRET" https://your-app.vercel.app/api/cron/nudges`.
 
 ### Schema / data-model improvements
 
@@ -202,7 +212,7 @@ To get the new code fully working in production:
    UPSTASH_REDIS_REST_URL=...
    UPSTASH_REDIS_REST_TOKEN=...
 
-   # NEW — Cron auth (Vercel Cron sets this for you on Pro plans)
+   # NEW — Cron auth (used by manual triggers + future external scheduler)
    CRON_SECRET=<random-32-char-string>
 
    # OPTIONAL — model overrides
@@ -218,9 +228,18 @@ To get the new code fully working in production:
    update students set role = 'tpc_admin' where email = 'you@college.edu';
    ```
 
-4. **Verify cron schedules** in `frontend/vercel.json` — already configured:
-   - `/api/cron/nudges` daily at 09:00
-   - `/api/cron/accountability` every 6 hours
+4. **Cron jobs — manual / external for now** *(Vercel Pro deferred)*
+   The two cron routes still work; they just aren't auto-scheduled.
+   Trigger them on demand:
+   ```bash
+   curl -H "Authorization: Bearer $CRON_SECRET" https://your-app.vercel.app/api/cron/nudges
+   curl -H "Authorization: Bearer $CRON_SECRET" https://your-app.vercel.app/api/cron/accountability
+   ```
+   When you're ready to automate, point any external scheduler
+   (`cron-job.org`, GitHub Actions, Upstash QStash, etc.) at those URLs
+   with the `Authorization` header — or upgrade to Vercel Pro and add a
+   `vercel.json` with a `crons[]` block (see git history for the prior
+   config).
 
 5. **First-time test flow**
    - Sign in → upload a real PDF resume → confirm `/api/resume/analyze` 200s
