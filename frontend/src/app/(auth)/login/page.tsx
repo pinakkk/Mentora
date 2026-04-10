@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/primitives/button";
-import { Input } from "@/components/primitives/input";
-import { Eye, EyeOff, Globe, Sparkles, ArrowRight, ArrowLeft } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -319,9 +316,12 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-20 flex items-center gap-8">
-          <Link href="/" className="inline-flex items-center text-sm font-medium text-slate-900/60 hover:text-slate-900 transition-colors">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
+          <Link
+            href="/"
+            aria-label="Back to home"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/55 bg-white/45 text-slate-700 backdrop-blur-sm transition-all hover:bg-white hover:text-slate-950"
+          >
+            <ArrowLeft className="h-4 w-4" />
           </Link>
           <div className="h-4 w-px bg-slate-400"></div>
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
@@ -465,9 +465,12 @@ export default function LoginPage() {
       <div className="flex items-center justify-center p-8 bg-transparent relative">
         <div className="w-full max-w-[420px]">
           <div className="lg:hidden flex items-center justify-between mb-12">
-            <Link href="/" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              Back
+            <Link
+              href="/"
+              aria-label="Back to home"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[#ddd5f5] bg-white/75 text-slate-600 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:text-slate-950"
+            >
+              <ArrowLeft className="h-4 w-4" />
             </Link>
             <div className="flex items-center justify-center text-lg font-semibold">
               <span>PlaceAI</span>
@@ -487,7 +490,7 @@ export default function LoginPage() {
           <form onSubmit={handleEmailAuth} className="space-y-5">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
-              <Input
+              <input
                 id="email"
                 type="email"
                 placeholder="you@example.com"
@@ -497,14 +500,14 @@ export default function LoginPage() {
                 onFocus={() => setIsTyping(true)}
                 onBlur={() => setIsTyping(false)}
                 required
-                className="h-12 bg-white/70 border-[#d9d1f4] focus:border-[#7c5bf0] focus:ring-[#7c5bf0]/60"
+                className="h-12 w-full rounded-[22px] border border-[#d9d1f4] bg-white/78 px-4 text-[15px] text-slate-900 shadow-[0_8px_24px_rgba(124,91,240,0.06)] outline-none transition focus:border-[#7c5bf0] focus:ring-4 focus:ring-[#7c5bf0]/12"
               />
             </div>
 
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium text-slate-700">Password</label>
               <div className="relative">
-                <Input
+                <input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
@@ -513,7 +516,7 @@ export default function LoginPage() {
                   onFocus={() => setIsTyping(true)}
                   onBlur={() => setIsTyping(false)}
                   required
-                  className="h-12 pr-10 bg-white/70 border-[#d9d1f4] focus:border-[#7c5bf0] focus:ring-[#7c5bf0]/60"
+                  className="h-12 w-full rounded-[22px] border border-[#d9d1f4] bg-white/78 px-4 pr-12 text-[15px] text-slate-900 shadow-[0_8px_24px_rgba(124,91,240,0.06)] outline-none transition focus:border-[#7c5bf0] focus:ring-4 focus:ring-[#7c5bf0]/12"
                   minLength={6}
                 />
                 <button
@@ -536,14 +539,14 @@ export default function LoginPage() {
               </div>
             )}
 
-            <Button
+            <button
               type="submit"
-              className="w-full h-12 text-base font-medium rounded-full bg-[#17131f] hover:bg-[#231b33] text-white transition-all shadow-[0_22px_55px_rgba(23,19,31,0.24)]"
+              className="flex h-12 w-full items-center justify-center rounded-[22px] bg-[#17131f] text-base font-medium text-white transition-all shadow-[0_22px_55px_rgba(23,19,31,0.24)] hover:bg-[#231b33] disabled:cursor-not-allowed disabled:opacity-70"
               disabled={loading}
             >
               {loading ? "Processing..." : (isSignUp ? "Create Account" : "Log in")}
               <ArrowRight className="ml-2 h-4 w-4 text-[#b7a4fa]" />
-            </Button>
+            </button>
           </form>
 
           <div className="relative my-8">
@@ -558,9 +561,8 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <Button
-              variant="outline"
-              className="w-full h-12 rounded-full border-[#d9d1f4] bg-white/78 text-slate-700 shadow-sm transition-all hover:bg-white hover:text-slate-900"
+            <button
+              className="flex h-12 w-full items-center justify-center rounded-[22px] border border-[#d9d1f4] bg-white/82 text-slate-700 shadow-[0_8px_24px_rgba(124,91,240,0.06)] transition-all hover:bg-white hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
               type="button"
               onClick={handleGoogleAuth}
               disabled={loading}
@@ -584,7 +586,7 @@ export default function LoginPage() {
                 />
               </svg>
               Continue with Google
-            </Button>
+            </button>
           </div>
 
           <div className="text-center text-sm text-slate-500 mt-8">

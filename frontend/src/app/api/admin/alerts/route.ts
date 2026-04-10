@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { requireAdmin } from "@/lib/auth";
 
 const serviceClient = createServiceClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,6 +8,9 @@ const serviceClient = createServiceClient(
 );
 
 export async function GET() {
+  const auth = await requireAdmin();
+  if (auth instanceof Response) return auth;
+
   const { data: alerts } = await serviceClient
     .from("tpc_alerts")
     .select("*, students(name)")

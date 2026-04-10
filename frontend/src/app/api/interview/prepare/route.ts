@@ -2,6 +2,7 @@ import { generateText } from "ai";
 import { chatModel } from "@/lib/ai/provider";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { rateLimitOrReject } from "@/lib/ratelimit";
 
 export const maxDuration = 60;
 
@@ -16,6 +17,9 @@ export async function POST(req: Request) {
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const rl = await rateLimitOrReject("interview", user.id);
+  if (rl) return rl;
 
   const serviceClient = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

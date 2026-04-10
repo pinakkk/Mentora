@@ -18,22 +18,14 @@ import {
   Sparkles,
   BarChart3,
   Lightbulb,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/primitives/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/primitives/card";
-import { Badge } from "@/components/primitives/badge";
-import {
-  Progress,
-  ProgressTrack,
-  ProgressIndicator,
-} from "@/components/primitives/progress";
 import { Skeleton } from "@/components/primitives/skeleton";
+import {
+  GitHubAnalyzerPanel,
+  LinkedInAnalyzerPanel,
+} from "@/components/diagnostic-panels";
 
 interface AnalysisResult {
   skills: Array<{
@@ -56,6 +48,8 @@ interface ResumeFile {
   size: number;
 }
 
+/* ── helpers ─────────────────────────────────────────────── */
+
 function formatFileSize(bytes: number) {
   if (!bytes) return "---";
   if (bytes < 1024) return `${bytes} B`;
@@ -75,23 +69,195 @@ function formatDate(dateStr: string) {
   });
 }
 
-function getScoreColor(score: number) {
-  if (score >= 70) return "text-emerald-600";
-  if (score >= 40) return "text-amber-600";
-  return "text-red-500";
+function scoreTone(score: number) {
+  if (score >= 70)
+    return {
+      stroke: "#10b981",
+      text: "text-emerald-600",
+      bg: "bg-emerald-50",
+      label: "Strong",
+    };
+  if (score >= 40)
+    return {
+      stroke: "#f59e0b",
+      text: "text-amber-600",
+      bg: "bg-amber-50",
+      label: "Moderate",
+    };
+  return {
+    stroke: "#ef4444",
+    text: "text-red-500",
+    bg: "bg-red-50",
+    label: "Needs Work",
+  };
 }
 
-function getScoreLabel(score: number) {
-  if (score >= 70) return "Strong";
-  if (score >= 40) return "Moderate";
-  return "Needs Work";
+function skillTone(level: number) {
+  if (level >= 7)
+    return { bar: "linear-gradient(90deg,#10b981,#34d399)", text: "text-emerald-600" };
+  if (level >= 4)
+    return { bar: "linear-gradient(90deg,#7c5bf0,#a78bfa)", text: "text-[#6f58d9]" };
+  return { bar: "linear-gradient(90deg,#f59e0b,#fbbf24)", text: "text-amber-600" };
 }
 
-function getSkillBarColor(level: number) {
-  if (level >= 7) return "bg-emerald-500";
-  if (level >= 4) return "bg-blue-500";
-  return "bg-amber-500";
+/* ── shared building blocks (landing-page vocabulary) ────── */
+
+function SectionEyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.22em] text-[#6f58d9]">
+      {children}
+    </span>
+  );
 }
+
+function PageHeading({
+  eyebrow,
+  title,
+  description,
+}: {
+  eyebrow: string;
+  title: React.ReactNode;
+  description: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <SectionEyebrow>{eyebrow}</SectionEyebrow>
+      <h1 className="font-heading text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900 mt-2">
+        {title}
+      </h1>
+      <p className="text-sm text-gray-500 mt-2 max-w-2xl leading-relaxed">
+        {description}
+      </p>
+    </motion.div>
+  );
+}
+
+function PolishedCard({
+  children,
+  className = "",
+  glow = true,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  glow?: boolean;
+}) {
+  return (
+    <div className={`group relative ${className}`}>
+      {glow && (
+        <div
+          className="absolute -inset-[1px] rounded-[28px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(124,91,240,0.18), rgba(167,139,250,0.05) 40%, transparent 70%)",
+            filter: "blur(8px)",
+          }}
+        />
+      )}
+      <div
+        className="relative h-full rounded-[26px] border bg-white p-6 sm:p-7 shadow-[0_8px_30px_rgba(124,91,240,0.06)] hover:shadow-[0_12px_40px_rgba(124,91,240,0.12)] transition-shadow duration-500"
+        style={{ borderColor: "rgba(0,0,0,0.06)" }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function CardHeading({
+  eyebrow,
+  title,
+  subtitle,
+  icon: Icon,
+  iconGradient,
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  iconGradient: string;
+}) {
+  return (
+    <div className="flex items-start gap-4 mb-5">
+      <div
+        className="h-11 w-11 rounded-2xl flex items-center justify-center shrink-0 shadow-sm"
+        style={{ background: iconGradient }}
+      >
+        <Icon className="h-5 w-5 text-white" />
+      </div>
+      <div className="min-w-0 pt-0.5">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6f58d9]">
+          {eyebrow}
+        </span>
+        <h3 className="font-heading text-lg font-semibold tracking-tight text-gray-900 mt-0.5">
+          {title}
+        </h3>
+        {subtitle && (
+          <p className="text-xs text-gray-500 leading-relaxed mt-1">
+            {subtitle}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Readiness ring ──────────────────────────────────────── */
+
+function ReadinessRing({ score }: { score: number }) {
+  const tone = scoreTone(score);
+  const pct = Math.max(0, Math.min(100, score)) / 100;
+  const R = 56;
+  const C = 2 * Math.PI * R;
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <svg viewBox="0 0 140 140" className="h-36 w-36 -rotate-90">
+        <defs>
+          <linearGradient id="readiness-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#7c5bf0" />
+            <stop offset="100%" stopColor="#a78bfa" />
+          </linearGradient>
+        </defs>
+        <circle
+          cx="70"
+          cy="70"
+          r={R}
+          fill="none"
+          stroke="rgba(124,91,240,0.08)"
+          strokeWidth="10"
+        />
+        <motion.circle
+          cx="70"
+          cy="70"
+          r={R}
+          fill="none"
+          stroke="url(#readiness-grad)"
+          strokeWidth="10"
+          strokeLinecap="round"
+          strokeDasharray={C}
+          initial={{ strokeDashoffset: C }}
+          animate={{ strokeDashoffset: C * (1 - pct) }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-heading text-4xl font-bold tabular-nums text-gray-900">
+          {score}
+          <span className="text-base text-gray-300 font-normal">/100</span>
+        </span>
+        <span className={`text-[11px] font-semibold uppercase tracking-wider mt-0.5 ${tone.text}`}>
+          {tone.label}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ── Page ────────────────────────────────────────────────── */
 
 export default function ResumePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -188,7 +354,6 @@ export default function ResumePage() {
       const result = await analyzeRes.json();
       setAnalysis(result);
 
-      // Refresh the resume list
       const listRes = await fetch("/api/resume/list");
       if (listRes.ok) {
         const data = await listRes.json();
@@ -210,223 +375,264 @@ export default function ResumePage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-5xl mx-auto space-y-6">
-        <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-80 mt-2" />
+      <div className="p-6 max-w-6xl mx-auto space-y-8">
+        <div className="space-y-3">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-9 w-72" />
+          <Skeleton className="h-4 w-96" />
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          <Skeleton className="h-32 md:col-span-2" />
-          <Skeleton className="h-32" />
+        <div className="grid gap-6 md:grid-cols-5">
+          <Skeleton className="h-56 md:col-span-3 rounded-[26px]" />
+          <Skeleton className="h-56 md:col-span-2 rounded-[26px]" />
         </div>
-        <Skeleton className="h-64" />
+        <Skeleton className="h-72 rounded-[26px]" />
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Resume Analysis</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Upload your resume to get AI-powered skill assessment and placement
-          readiness insights
-        </p>
+    <div
+      className="relative min-h-full"
+      style={{ background: "var(--surface)" }}
+    >
+      {/* Soft background blobs (landing-page vibe) */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(124,91,240,0.08),transparent_70%)]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(167,139,250,0.06),transparent_70%)]" />
       </div>
 
-      {/* Top Section: Upload + Quick Score */}
-      <div className="grid gap-6 md:grid-cols-5">
-        {/* Upload Zone */}
-        <Card className="md:col-span-3">
-          <CardContent className="p-6">
-            <div
-              onDrop={handleDrop}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setDragOver(true);
-              }}
-              onDragLeave={() => setDragOver(false)}
-              className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
-                dragOver
-                  ? "border-violet-400 bg-violet-50/50 scale-[1.01]"
-                  : file
-                  ? "border-emerald-300 bg-emerald-50/30"
-                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/50"
-              }`}
-            >
-              {file ? (
-                <div className="space-y-3">
-                  <div className="mx-auto w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
-                    <FileText className="h-6 w-6 text-emerald-600" />
+      <div className="relative p-6 lg:p-10 max-w-6xl mx-auto space-y-10">
+        {/* ── Page header ─────────────────────────────────── */}
+        <PageHeading
+          eyebrow="Resume Diagnostic"
+          title={
+            <>
+              Turn your resume into a{" "}
+              <span
+                className="italic text-transparent bg-clip-text"
+                style={{
+                  backgroundImage: "linear-gradient(135deg, #7c5bf0, #a78bfa)",
+                }}
+              >
+                readiness blueprint
+              </span>
+              .
+            </>
+          }
+          description="Drop your PDF and PlaceAI extracts your skills, scores your placement readiness, and generates a personalized prep plan in under a minute."
+        />
+
+        {/* ── Upload + Score ──────────────────────────────── */}
+        <div className="grid gap-6 lg:grid-cols-5">
+          {/* Upload zone */}
+          <div className="lg:col-span-3">
+            <PolishedCard>
+              <CardHeading
+                eyebrow="Step 1"
+                title="Upload your resume"
+                subtitle="PDF only, up to 10 MB. We extract real text — no hallucinations."
+                icon={Upload}
+                iconGradient="linear-gradient(135deg,#7c5bf0,#a78bfa)"
+              />
+
+              <div
+                onDrop={handleDrop}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragOver(true);
+                }}
+                onDragLeave={() => setDragOver(false)}
+                className={`relative rounded-2xl p-7 text-center transition-all duration-300 border ${
+                  dragOver
+                    ? "border-[#7c5bf0]/40 bg-[#7c5bf0]/[0.04] scale-[1.01]"
+                    : file
+                    ? "border-emerald-200 bg-emerald-50/40"
+                    : "border-dashed border-gray-200 hover:border-[#7c5bf0]/30 hover:bg-[#7c5bf0]/[0.02]"
+                }`}
+              >
+                {file ? (
+                  <div className="space-y-3">
+                    <div className="mx-auto w-12 h-12 rounded-2xl bg-emerald-100/80 flex items-center justify-center">
+                      <FileText className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm text-gray-900">
+                        {file.name}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-0.5 tabular-nums">
+                        {(file.size / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setFile(null)}
+                      className="text-xs text-gray-400 hover:text-gray-600"
+                    >
+                      Remove
+                    </Button>
                   </div>
-                  <div>
-                    <p className="font-medium text-sm">{file.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {(file.size / 1024).toFixed(1)} KB
-                    </p>
+                ) : (
+                  <div className="space-y-3">
+                    <div
+                      className="mx-auto w-12 h-12 rounded-2xl flex items-center justify-center"
+                      style={{ background: "rgba(124,91,240,0.08)" }}
+                    >
+                      <Upload className="h-5 w-5" style={{ color: "#7c5bf0" }} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        Drop your resume here
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        or click to browse files
+                      </p>
+                    </div>
+                    <label className="inline-block">
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      <span
+                        className="inline-flex h-9 items-center justify-center rounded-full px-4 text-xs font-semibold cursor-pointer transition-colors text-white shadow-sm"
+                        style={{
+                          background: "linear-gradient(135deg,#7c5bf0,#a78bfa)",
+                        }}
+                      >
+                        Browse Files
+                      </span>
+                    </label>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setFile(null);
-                    }}
-                    className="text-xs text-muted-foreground"
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="mx-auto w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
-                    <Upload className="h-6 w-6 text-gray-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">
-                      Drop your resume PDF here
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      PDF format, up to 10 MB
-                    </p>
-                  </div>
-                  <label>
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    <span className="inline-flex h-8 items-center justify-center rounded-lg border bg-background px-3 text-xs font-medium cursor-pointer hover:bg-accent transition-colors">
-                      Browse Files
-                    </span>
-                  </label>
+                )}
+              </div>
+
+              {error && (
+                <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-xl bg-red-50/80 border border-red-100 text-red-600 text-xs">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>{error}</span>
                 </div>
               )}
-            </div>
 
-            {error && (
-              <div className="flex items-center gap-2 mt-3 text-red-500 text-sm">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
+              {file && (
+                <Button
+                  className="w-full mt-4 h-11 rounded-2xl text-sm font-semibold text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-shadow"
+                  style={{
+                    background: "linear-gradient(135deg,#7c5bf0,#a78bfa)",
+                  }}
+                  onClick={handleUploadAndAnalyze}
+                  disabled={uploading || analyzing}
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Uploading…
+                    </>
+                  ) : analyzing ? (
+                    <>
+                      <Brain className="h-4 w-4 animate-pulse mr-2" />
+                      Analyzing & generating plan…
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Upload & Analyze
+                      <ArrowRight className="h-3.5 w-3.5 ml-2 opacity-70" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </PolishedCard>
+          </div>
 
-            {file && (
-              <Button
-                className="w-full mt-4 h-10 rounded-lg bg-gray-900 hover:bg-gray-800 text-sm"
-                onClick={handleUploadAndAnalyze}
-                disabled={uploading || analyzing}
-              >
-                {uploading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Uploading...
-                  </>
-                ) : analyzing ? (
-                  <>
-                    <Brain className="h-4 w-4 animate-pulse mr-2" />
-                    Analyzing & generating plan...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Upload & Analyze
-                  </>
-                )}
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Quick Score Card */}
-        <Card className="md:col-span-2">
-          <CardContent className="p-6 flex flex-col items-center justify-center h-full">
-            {analysis ? (
-              <div className="text-center space-y-3 w-full">
-                <div className="mx-auto w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center">
-                  <Target className="h-7 w-7 text-violet-600" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Readiness Score
+          {/* Score card */}
+          <div className="lg:col-span-2">
+            <PolishedCard>
+              <CardHeading
+                eyebrow="Step 2"
+                title="Readiness Score"
+                subtitle="Your overall placement readiness."
+                icon={Target}
+                iconGradient="linear-gradient(135deg,#10b981,#34d399)"
+              />
+              {analysis ? (
+                <div className="flex flex-col items-center justify-center pt-2">
+                  <ReadinessRing score={analysis.readinessScore} />
+                  <p className="text-xs text-gray-500 mt-4 text-center max-w-[220px]">
+                    Computed from skills, strengths, gaps, and prior assessments.
                   </p>
-                  <p
-                    className={`text-4xl font-bold mt-1 ${getScoreColor(
-                      analysis.readinessScore
-                    )}`}
-                  >
-                    {analysis.readinessScore}
-                    <span className="text-lg text-muted-foreground font-normal">
-                      /100
-                    </span>
-                  </p>
-                  <Badge
-                    variant="secondary"
-                    className={`mt-2 ${
-                      analysis.readinessScore >= 70
-                        ? "bg-emerald-50 text-emerald-700"
-                        : analysis.readinessScore >= 40
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-red-50 text-red-600"
-                    }`}
-                  >
-                    {getScoreLabel(analysis.readinessScore)}
-                  </Badge>
                 </div>
-                <div className="w-full px-2">
-                  <Progress value={analysis.readinessScore}>
-                    <ProgressTrack className="h-2 bg-gray-100">
-                      <ProgressIndicator
-                        className={
-                          analysis.readinessScore >= 70
-                            ? "bg-emerald-500"
-                            : analysis.readinessScore >= 40
-                            ? "bg-amber-500"
-                            : "bg-red-500"
-                        }
-                      />
-                    </ProgressTrack>
-                  </Progress>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center space-y-3">
-                <div className="mx-auto w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center">
-                  <BarChart3 className="h-7 w-7 text-gray-300" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    No analysis yet
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+              ) : (
+                <div className="flex flex-col items-center justify-center pt-2 pb-4">
+                  <div className="w-32 h-32 rounded-full border-[10px] border-gray-100 flex items-center justify-center">
+                    <BarChart3 className="h-7 w-7 text-gray-300" />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-4 text-center">
                     Upload a resume to see your score
                   </p>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              )}
+            </PolishedCard>
+          </div>
+        </div>
 
-      {/* Previous Uploads */}
-      {previousResumes.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base">Uploaded Resumes</CardTitle>
-                <CardDescription className="text-xs mt-0.5">
-                  {previousResumes.length} resume
-                  {previousResumes.length !== 1 ? "s" : ""} uploaded
-                </CardDescription>
+        {/* ── Profile Audit (GitHub + LinkedIn) ───────────── */}
+        <div>
+          <div className="mb-5">
+            <SectionEyebrow>Profile Audit</SectionEyebrow>
+            <h2 className="font-heading text-xl sm:text-2xl font-semibold tracking-tight text-gray-900 mt-2">
+              Verify the story your resume{" "}
+              <span
+                className="italic text-transparent bg-clip-text"
+                style={{
+                  backgroundImage: "linear-gradient(135deg, #7c5bf0, #a78bfa)",
+                }}
+              >
+                actually tells
+              </span>
+              .
+            </h2>
+            <p className="text-sm text-gray-500 mt-2 max-w-2xl">
+              Cross-reference your claims against your real GitHub activity and LinkedIn profile.
+            </p>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <GitHubAnalyzerPanel />
+            <LinkedInAnalyzerPanel />
+          </div>
+        </div>
+
+        {/* ── Previous Uploads ────────────────────────────── */}
+        {previousResumes.length > 0 && (
+          <PolishedCard>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-start gap-4">
+                <div
+                  className="h-11 w-11 rounded-2xl flex items-center justify-center shrink-0 shadow-sm"
+                  style={{ background: "linear-gradient(135deg,#64748b,#94a3b8)" }}
+                >
+                  <FileText className="h-5 w-5 text-white" />
+                </div>
+                <div className="pt-0.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6f58d9]">
+                    Archive
+                  </span>
+                  <h3 className="font-heading text-lg font-semibold tracking-tight text-gray-900 mt-0.5">
+                    Uploaded Resumes
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {previousResumes.length} version
+                    {previousResumes.length !== 1 ? "s" : ""} archived
+                  </p>
+                </div>
               </div>
               {previousResumes.length > 3 && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowAllResumes(!showAllResumes)}
-                  className="text-xs"
+                  className="text-xs text-[#6f58d9] hover:text-[#5b3ec4]"
                 >
                   {showAllResumes ? (
                     <>
@@ -441,248 +647,302 @@ export default function ResumePage() {
                 </Button>
               )}
             </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="divide-y divide-gray-100">
+            <div className="space-y-2">
               {displayedResumes.map((resume, i) => (
                 <motion.div
                   key={resume.fullName}
-                  initial={{ opacity: 0, y: 5 }}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+                  className="flex items-center gap-3 p-3 rounded-2xl border bg-gray-50/40 hover:bg-white transition-colors"
+                  style={{ borderColor: "rgba(0,0,0,0.05)" }}
                 >
-                  <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
-                    <FileText className="h-4 w-4 text-red-500" />
+                  <div className="w-9 h-9 rounded-xl bg-white border border-gray-100 flex items-center justify-center shrink-0">
+                    <FileText className="h-4 w-4 text-gray-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-sm font-medium text-gray-900 truncate">
                       {resume.name}
                     </p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                    <div className="flex items-center gap-2 text-[11px] text-gray-400 mt-0.5">
                       <Clock className="h-3 w-3" />
                       <span>{formatDate(resume.createdAt)}</span>
-                      <span className="text-gray-300">|</span>
-                      <span>{formatFileSize(resume.size)}</span>
+                      <span className="text-gray-200">·</span>
+                      <span className="tabular-nums">
+                        {formatFileSize(resume.size)}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     {i === 0 && (
-                      <Badge
-                        variant="secondary"
-                        className="bg-violet-50 text-violet-700 text-[10px] mr-1"
+                      <span
+                        className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                        style={{
+                          background: "rgba(124,91,240,0.1)",
+                          color: "#5b3ec4",
+                        }}
                       >
                         Latest
-                      </Badge>
+                      </span>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
+                    <button
                       onClick={() => window.open(resume.url, "_blank")}
+                      className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
+                      title="View"
                     >
                       <Eye className="h-3.5 w-3.5" />
-                    </Button>
+                    </button>
                   </div>
                 </motion.div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </PolishedCard>
+        )}
 
-      {/* Analysis Results */}
-      <AnimatePresence>
-        {analysis && analysis.skills && analysis.skills.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="space-y-6"
-          >
-            {/* Skills */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-violet-500" />
-                  Detected Skills
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  {analysis.skills.length} skills identified from your resume
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="grid gap-3 sm:grid-cols-2">
+        {/* ── Analysis Results ────────────────────────────── */}
+        <AnimatePresence>
+          {analysis && analysis.skills && analysis.skills.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="space-y-6"
+            >
+              <div>
+                <SectionEyebrow>Diagnostic Report</SectionEyebrow>
+                <h2 className="font-heading text-xl sm:text-2xl font-semibold tracking-tight text-gray-900 mt-2">
+                  Here&apos;s what your resume{" "}
+                  <span
+                    className="italic text-transparent bg-clip-text"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(135deg, #7c5bf0, #a78bfa)",
+                    }}
+                  >
+                    really says
+                  </span>
+                  .
+                </h2>
+              </div>
+
+              {/* Detected Skills */}
+              <PolishedCard>
+                <CardHeading
+                  eyebrow="Skills Map"
+                  title="Detected Skills"
+                  subtitle={`${analysis.skills.length} skills identified, scored 0–10 with confidence.`}
+                  icon={BarChart3}
+                  iconGradient="linear-gradient(135deg,#7c5bf0,#a78bfa)"
+                />
+                <div className="grid gap-4 sm:grid-cols-2">
                   {analysis.skills
                     .sort((a, b) => b.level - a.level)
-                    .map((skill, i) => (
-                      <motion.div
-                        key={skill.name}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.03 }}
-                        className="flex items-center gap-3 group"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium truncate">
+                    .map((skill, i) => {
+                      const tone = skillTone(skill.level);
+                      return (
+                        <motion.div
+                          key={skill.name}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.03 }}
+                          className="group/skill"
+                        >
+                          <div className="flex items-baseline justify-between mb-1.5">
+                            <span className="text-sm font-medium text-gray-800 truncate">
                               {skill.name}
                             </span>
-                            <span className="text-xs text-muted-foreground ml-2 tabular-nums">
-                              {skill.level}/10
-                            </span>
+                            <div className="flex items-baseline gap-2 shrink-0">
+                              <span
+                                className={`text-sm font-bold tabular-nums ${tone.text}`}
+                              >
+                                {skill.level}
+                                <span className="text-[10px] text-gray-300 font-normal">
+                                  /10
+                                </span>
+                              </span>
+                              <span className="text-[10px] text-gray-300 tabular-nums">
+                                {Math.round(skill.confidence * 100)}%
+                              </span>
+                            </div>
                           </div>
                           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${skill.level * 10}%` }}
                               transition={{
-                                duration: 0.6,
+                                duration: 0.7,
                                 delay: i * 0.03 + 0.2,
+                                ease: [0.22, 1, 0.36, 1],
                               }}
-                              className={`h-full rounded-full ${getSkillBarColor(
-                                skill.level
-                              )}`}
+                              className="h-full rounded-full"
+                              style={{ background: tone.bar }}
                             />
                           </div>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground tabular-nums w-8 text-right">
-                          {Math.round(skill.confidence * 100)}%
-                        </span>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      );
+                    })}
                 </div>
-              </CardContent>
-            </Card>
+              </PolishedCard>
 
-            {/* Strengths & Gaps */}
-            {(analysis.strengths.length > 0 || analysis.gaps.length > 0) && (
-              <div className="grid gap-6 md:grid-cols-2">
-                {analysis.strengths.length > 0 && (
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2 text-emerald-700">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Strengths
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0">
+              {/* Strengths + Gaps */}
+              {(analysis.strengths.length > 0 || analysis.gaps.length > 0) && (
+                <div className="grid gap-6 lg:grid-cols-2">
+                  {analysis.strengths.length > 0 && (
+                    <PolishedCard>
+                      <CardHeading
+                        eyebrow="Wins"
+                        title="Strengths"
+                        subtitle="What you're already doing well."
+                        icon={CheckCircle2}
+                        iconGradient="linear-gradient(135deg,#10b981,#34d399)"
+                      />
                       <ul className="space-y-2.5">
                         {analysis.strengths.map((s, i) => (
                           <motion.li
                             key={i}
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: i * 0.05 }}
-                            className="flex items-start gap-2.5 text-sm"
+                            className="flex items-start gap-3 p-3 rounded-2xl bg-emerald-50/40 border border-emerald-100/60"
                           >
-                            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                            <span className="text-gray-700">{s}</span>
+                            <div className="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                              <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                            </div>
+                            <span className="text-sm text-gray-700 leading-relaxed">
+                              {s}
+                            </span>
                           </motion.li>
                         ))}
                       </ul>
-                    </CardContent>
-                  </Card>
-                )}
+                    </PolishedCard>
+                  )}
 
-                {analysis.gaps.length > 0 && (
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2 text-amber-700">
-                        <TrendingUp className="h-4 w-4" />
-                        Gaps to Address
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0">
+                  {analysis.gaps.length > 0 && (
+                    <PolishedCard>
+                      <CardHeading
+                        eyebrow="Focus"
+                        title="Gaps to Address"
+                        subtitle="Areas your prep plan will target."
+                        icon={TrendingUp}
+                        iconGradient="linear-gradient(135deg,#f59e0b,#fbbf24)"
+                      />
                       <ul className="space-y-2.5">
                         {analysis.gaps.map((g, i) => (
                           <motion.li
                             key={i}
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: i * 0.05 }}
-                            className="flex items-start gap-2.5 text-sm"
+                            className="flex items-start gap-3 p-3 rounded-2xl bg-amber-50/40 border border-amber-100/60"
                           >
-                            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                            <span className="text-gray-700">{g}</span>
+                            <div className="h-5 w-5 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                              <TrendingUp className="h-3 w-3 text-amber-600" />
+                            </div>
+                            <span className="text-sm text-gray-700 leading-relaxed">
+                              {g}
+                            </span>
                           </motion.li>
                         ))}
                       </ul>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            )}
+                    </PolishedCard>
+                  )}
+                </div>
+              )}
 
-            {/* Recommendations */}
-            {analysis.recommendations.length > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4 text-amber-500" />
-                    Recommendations
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    Actionable steps to improve your placement readiness
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
+              {/* Recommendations */}
+              {analysis.recommendations.length > 0 && (
+                <PolishedCard>
+                  <CardHeading
+                    eyebrow="Action Plan"
+                    title="Recommendations"
+                    subtitle="Concrete next steps tailored to this resume."
+                    icon={Lightbulb}
+                    iconGradient="linear-gradient(135deg,#7c5bf0,#a78bfa)"
+                  />
                   <div className="space-y-3">
                     {analysis.recommendations.map((rec, i) => (
                       <motion.div
                         key={i}
-                        initial={{ opacity: 0, y: 5 }}
+                        initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className="flex items-start gap-3 p-3 rounded-lg bg-gray-50/80 hover:bg-gray-50 transition-colors"
+                        className="flex items-start gap-3 p-4 rounded-2xl border bg-gradient-to-br from-[#7c5bf0]/[0.03] to-transparent hover:from-[#7c5bf0]/[0.06] transition-colors"
+                        style={{ borderColor: "rgba(124,91,240,0.1)" }}
                       >
-                        <div className="w-6 h-6 rounded-md bg-white border border-gray-200 flex items-center justify-center shrink-0 text-xs font-semibold text-muted-foreground">
+                        <div
+                          className="h-7 w-7 rounded-xl flex items-center justify-center shrink-0 text-[11px] font-bold tabular-nums text-white shadow-sm"
+                          style={{
+                            background:
+                              "linear-gradient(135deg,#7c5bf0,#a78bfa)",
+                          }}
+                        >
                           {i + 1}
                         </div>
-                        <p className="text-sm text-gray-700 leading-relaxed">
+                        <p className="text-sm text-gray-700 leading-relaxed pt-1">
                           {rec}
                         </p>
                       </motion.div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
-            {analysis && (
+                </PolishedCard>
+              )}
+
+              {/* Plan generated banner */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
               >
-                <Card className="border-emerald-200 bg-emerald-50/30">
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-lg bg-emerald-100 flex items-center justify-center">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <div
+                  className="relative overflow-hidden rounded-[26px] border p-5 sm:p-6"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(16,185,129,0.06), rgba(124,91,240,0.04))",
+                    borderColor: "rgba(16,185,129,0.2)",
+                  }}
+                >
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.1),transparent_70%)] pointer-events-none" />
+                  <div className="relative flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="h-11 w-11 rounded-2xl flex items-center justify-center shadow-sm"
+                        style={{
+                          background: "linear-gradient(135deg,#10b981,#34d399)",
+                        }}
+                      >
+                        <CheckCircle2 className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-emerald-900">
-                          Prep plan auto-generated
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-700">
+                          Auto-Generated
+                        </span>
+                        <p className="font-heading text-base font-semibold text-emerald-900 mt-0.5">
+                          Your prep plan is ready
                         </p>
-                        <p className="text-xs text-emerald-600 mt-0.5">
-                          A personalized 4-week timeline was created from your
-                          resume
+                        <p className="text-xs text-emerald-700/80 mt-0.5">
+                          A personalized 4-week timeline was created from your resume.
                         </p>
                       </div>
                     </div>
                     <a href="/plan">
                       <Button
                         size="sm"
-                        className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
+                        className="rounded-full text-white shadow-md font-medium gap-2"
+                        style={{
+                          background: "linear-gradient(135deg,#10b981,#059669)",
+                        }}
                       >
                         View Plan
+                        <ArrowRight className="h-3.5 w-3.5" />
                       </Button>
                     </a>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </motion.div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

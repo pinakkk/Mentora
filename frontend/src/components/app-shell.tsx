@@ -11,7 +11,6 @@ import {
   CalendarRange,
   Building2,
   BookOpen,
-  ShieldCheck,
   LogOut,
   Menu,
   Bell,
@@ -30,10 +29,6 @@ const mainNav = [
   { name: "Prep Plan", href: "/plan", icon: CalendarRange },
   { name: "Companies", href: "/companies", icon: Building2 },
   { name: "Coach's Notebook", href: "/memory", icon: BookOpen },
-];
-
-const adminNav = [
-  { name: "TPC Dashboard", href: "/admin", icon: ShieldCheck },
 ];
 
 interface AppShellProps {
@@ -72,28 +67,6 @@ function SidebarContent({
         </span>
         {mainNav.map((item) => {
           const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onNavigate}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
-                active
-                  ? "bg-[#7c5bf0] text-white shadow-sm font-medium"
-                  : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
-              }`}
-            >
-              <item.icon className="h-[18px] w-[18px]" />
-              {item.name}
-            </Link>
-          );
-        })}
-
-        <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider px-3 mb-2 mt-6">
-          Admin
-        </span>
-        {adminNav.map((item) => {
-          const active = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
@@ -157,9 +130,7 @@ export function AppShell({ user, children }: AppShellProps) {
     .toUpperCase();
 
   const currentPage =
-    mainNav.find((n) => pathname === n.href)?.name ||
-    adminNav.find((n) => pathname.startsWith(n.href))?.name ||
-    "Dashboard";
+    mainNav.find((n) => pathname === n.href)?.name || "Dashboard";
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-zinc-900">

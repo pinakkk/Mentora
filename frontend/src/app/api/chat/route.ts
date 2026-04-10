@@ -1,10 +1,14 @@
 import { streamText, stepCountIs, convertToModelMessages } from "ai";
+import { after } from "next/server";
 import { chatModel } from "@/lib/ai/provider";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { buildContext } from "@/server/memory/context-builder";
 import { buildCoachSystemPrompt } from "@/server/prompts/coach-system";
 import { createCoachTools } from "@/server/agents/tools";
+import { rateLimitOrReject } from "@/lib/ratelimit";
+import { touchInteraction } from "@/server/memory/episodic";
+import { detectAndStoreEmotion } from "@/server/agents/burnout-detector";
 
 export const maxDuration = 60;
 
@@ -27,6 +31,10 @@ export async function POST(req: Request) {
   if (!user) {
     return new Response("Unauthorized", { status: 401 });
   }
+
+  // Rate limit BEFORE doing any LLM work
+  const rl = await rateLimitOrReject("chat", user.id);
+  if (rl) return rl;
 
   const serviceClient = getServiceClient();
 
@@ -86,15 +94,31 @@ export async function POST(req: Request) {
       .join("") ||
     "";
 
-  // Build memory-enriched context
+  // Build memory-enriched context (3-layer: working + episodic + semantic)
   const context = await buildContext(student.id, lastMessage);
   const systemPrompt = buildCoachSystemPrompt(context);
+
+  const studentId = student.id;
+
+  // Schedule non-blocking work to run AFTER the response stream finishes.
+  // This is the correct way to do it on Next 16 — `setTimeout`/promise.catch
+  // can be cut off by serverless cold-stop. `after()` keeps the function alive.
+  after(async () => {
+    try {
+      await Promise.allSettled([
+        touchInteraction(studentId),
+        detectAndStoreEmotion(studentId, messages),
+      ]);
+    } catch (e) {
+      console.error("[chat:after] background tasks failed:", e);
+    }
+  });
 
   const result = streamText({
     model: chatModel,
     system: systemPrompt,
     messages: modelMessages,
-    tools: createCoachTools(student.id),
+    tools: createCoachTools(studentId),
     stopWhen: stepCountIs(10),
   });
 

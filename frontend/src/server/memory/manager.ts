@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { embedText } from "./embeddings";
+import { pushHotFact, pushSummary, getHotFacts } from "./episodic";
 import type { MemoryFact } from "@/types/memory";
 
 const supabase = createClient(
@@ -7,9 +8,23 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+/**
+ * MemoryManager — façade over the 3-layer memory system.
+ *
+ *   storeFact()       → writes to Layer 3 (pgvector) AND mirrors to Layer 2
+ *                       (Redis hot cache) so the next chat turn doesn't have
+ *                       to embed-search to find a fact we just learned.
+ *
+ *   recall()          → semantic search against pgvector. Used by the
+ *                       context builder which also reads the Redis hot list.
+ *
+ *   storeConversationSummary() → writes summary to Layer 2 episodic Redis
+ *                                AND persists in conversations.summary so it
+ *                                survives Redis evictions.
+ */
 export class MemoryManager {
   /**
-   * Store a new memory fact with embedding
+   * Store a new memory fact with embedding (Layer 3 + Layer 2 mirror).
    */
   async storeFact(
     studentId: string,
@@ -18,8 +33,8 @@ export class MemoryManager {
     importance: "high" | "medium" | "low" = "medium"
   ): Promise<string | null> {
     // Check for duplicate (cosine similarity > 0.9)
-    const isDuplicate = await this.isDuplicate(studentId, fact);
-    if (isDuplicate) return null;
+    const isDup = await this.isDuplicate(studentId, fact);
+    if (isDup) return null;
 
     const embedding = await embedText(fact);
 
@@ -43,6 +58,15 @@ export class MemoryManager {
       console.error("Error storing fact:", error);
       return null;
     }
+
+    // Mirror to episodic hot cache (non-blocking — fire & log).
+    pushHotFact(studentId, {
+      fact,
+      category,
+      importance,
+      createdAt: now,
+    }).catch((e) => console.warn("[memory] episodic mirror failed:", e));
+
     return data.id;
   }
 
@@ -63,7 +87,7 @@ export class MemoryManager {
   }
 
   /**
-   * Recall relevant memories for a given query
+   * Recall relevant memories for a given query (Layer 3 — pgvector).
    */
   async recall(
     studentId: string,
@@ -98,7 +122,24 @@ export class MemoryManager {
   }
 
   /**
-   * Get all facts for a student (for Coach's Notebook)
+   * Read facts from the Redis hot cache (Layer 2). Cheap, no embedding call.
+   * Returns an empty list if Redis isn't configured.
+   */
+  async hotFacts(studentId: string, limit = 10): Promise<MemoryFact[]> {
+    const hot = await getHotFacts(studentId, limit);
+    return hot.map((h, i) => ({
+      id: `hot:${i}`,
+      studentId,
+      fact: h.fact,
+      category: h.category as MemoryFact["category"],
+      importance: h.importance as MemoryFact["importance"],
+      createdAt: h.createdAt,
+      updatedAt: h.createdAt,
+    }));
+  }
+
+  /**
+   * Get all facts for a student (for Coach's Notebook UI)
    */
   async getAllFacts(studentId: string): Promise<MemoryFact[]> {
     const { data, error } = await supabase
@@ -124,26 +165,44 @@ export class MemoryManager {
   }
 
   /**
-   * Store a conversation summary with embedding
+   * Persist a conversation summary BOTH in Postgres (durable) and Redis
+   * (hot episodic cache). The pgvector embedding is best-effort.
    */
   async storeConversationSummary(
     studentId: string,
     conversationId: string,
     summary: string
   ): Promise<void> {
-    const embedding = await embedText(summary);
+    // Update the existing conversation row with the summary text + embedding.
+    let embeddingJson: string | null = null;
+    try {
+      const emb = await embedText(summary);
+      embeddingJson = JSON.stringify(emb);
+    } catch (e) {
+      console.warn("[memory] summary embedding failed (continuing):", e);
+    }
 
-    await supabase.from("conversation_summaries").insert({
-      id: crypto.randomUUID(),
-      student_id: studentId,
-      conversation_id: conversationId,
-      summary,
-      embedding: JSON.stringify(embedding),
-    });
+    const updates: Record<string, unknown> = { summary };
+    if (embeddingJson) updates.summary_embedding = embeddingJson;
+
+    const { error } = await supabase
+      .from("conversations")
+      .update(updates)
+      .eq("id", conversationId);
+
+    if (error) {
+      console.error("[memory] conversation summary persist failed:", error);
+    }
+
+    // Mirror into episodic Layer-2 cache.
+    pushSummary(studentId, summary).catch((e) =>
+      console.warn("[memory] episodic summary push failed:", e)
+    );
   }
 
   /**
-   * Get recent conversation summaries
+   * Get recent conversation summaries from Postgres (durable fallback).
+   * The context builder prefers Redis but falls back here.
    */
   async getRecentSummaries(studentId: string, limit: number = 3) {
     const { data } = await supabase

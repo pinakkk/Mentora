@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { chatCompletion } from "@/lib/groq/client";
+import { rateLimitOrReject } from "@/lib/ratelimit";
 
 export const maxDuration = 30;
 
@@ -12,6 +13,9 @@ export async function POST(req: Request) {
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const rl = await rateLimitOrReject("interview", user.id);
+  if (rl) return rl;
 
   const { question, rubric, answer, questionNumber, totalQuestions, interviewType } =
     await req.json();

@@ -1,5 +1,6 @@
 import { memoryManager } from "./manager";
 import { createClient } from "@supabase/supabase-js";
+import { getRecentSummaries as getEpisodicSummaries, getEpisodicState } from "./episodic";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,44 +24,81 @@ export interface AgentContext {
   recentConversations: string;
   pendingTasks: string;
   upcomingDeadlines: string;
+  emotionalState?: string;
 }
 
 /**
- * Build full context for agent calls.
- * Optimized to keep total context under ~400 tokens:
- * - Top 5 memories (not 10) — most relevant only
- * - 2 recent conversations (not 3)
- * - Compact formatting (no verbose labels)
+ * Build full context for agent calls — pulls from all 3 memory layers:
+ *
+ *   Layer 1 (Working):   `userMessage` itself + the messages array (handled by
+ *                        the LLM call site, not here)
+ *   Layer 2 (Episodic):  Redis hot facts + recent summaries + emotional state
+ *   Layer 3 (Semantic):  pgvector recall for the user's query
+ *
+ * Optimized to keep total context under ~500 tokens — top 5 semantic memories,
+ * top 3 hot facts (deduped against semantic), 2 recent summaries, 5 tasks.
  */
 export async function buildContext(
   studentId: string,
   userMessage: string
 ): Promise<AgentContext> {
-  const [student, memories, summaries, tasks] = await Promise.all([
-    getStudentProfile(studentId),
-    memoryManager.recall(studentId, userMessage, 5, 0.45).catch(() => []),
-    memoryManager.getRecentSummaries(studentId, 2).catch(() => []),
-    getPendingTasks(studentId),
-  ]);
+  const [student, semanticMemories, hotFacts, episodicSummaries, dbSummaries, tasks, state] =
+    await Promise.all([
+      getStudentProfile(studentId),
+      memoryManager.recall(studentId, userMessage, 5, 0.45).catch(() => []),
+      memoryManager.hotFacts(studentId, 5).catch(() => []),
+      getEpisodicSummaries(studentId, 3).catch(() => []),
+      memoryManager.getRecentSummaries(studentId, 3).catch(() => []),
+      getPendingTasks(studentId),
+      getEpisodicState(studentId).catch(() => null),
+    ]);
 
-  // Compact memory format: "[category] fact" (no importance/relevance % — saves tokens)
-  const relevantMemories = memories.length
-    ? memories
-        .map((m) => `[${m.category}] ${m.fact}`)
-        .join("\n")
+  // Merge semantic + episodic hot facts, dedupe by lowercase fact text.
+  const seen = new Set<string>();
+  const mergedFacts: Array<{ category: string; fact: string }> = [];
+  for (const m of semanticMemories) {
+    const key = m.fact.toLowerCase().trim();
+    if (!seen.has(key)) {
+      seen.add(key);
+      mergedFacts.push({ category: m.category, fact: m.fact });
+    }
+  }
+  for (const h of hotFacts) {
+    const key = h.fact.toLowerCase().trim();
+    if (!seen.has(key)) {
+      seen.add(key);
+      mergedFacts.push({ category: h.category, fact: h.fact });
+    }
+    if (mergedFacts.length >= 8) break;
+  }
+
+  const relevantMemories = mergedFacts.length
+    ? mergedFacts.map((m) => `[${m.category}] ${m.fact}`).join("\n")
     : "None.";
 
-  // Compact conversation format
-  const recentConversations = summaries.length
-    ? summaries
+  // Prefer Redis episodic summaries; fall back to durable DB summaries.
+  const summarySource =
+    episodicSummaries.length > 0
+      ? episodicSummaries.map((s) => ({
+          summary: s.text,
+          created_at: s.createdAt,
+        }))
+      : dbSummaries.map((s: { summary: string | null; created_at: string }) => ({
+          summary: s.summary || "",
+          created_at: s.created_at,
+        }));
+
+  const recentConversations = summarySource.length
+    ? summarySource
+        .slice(0, 2)
         .map(
-          (s: { summary: string; created_at: string }) =>
+          (s) =>
             `${new Date(s.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}: ${s.summary}`
         )
         .join("\n")
     : "None.";
 
-  // Compact task format: only pending, max 5
+  // Pending tasks (max 5)
   const pendingTasksList = tasks
     .filter(
       (t: { status: string }) =>
@@ -77,7 +115,7 @@ export async function buildContext(
     )
     .join("\n");
 
-  // Compact deadlines: top 3 only
+  // Top 3 upcoming deadlines
   const upcomingDeadlines = tasks
     .filter(
       (t: { deadline: string | null; status: string }) =>
@@ -111,6 +149,7 @@ export async function buildContext(
     recentConversations,
     pendingTasks: pendingTasksList || "None.",
     upcomingDeadlines: upcomingDeadlines || "None.",
+    emotionalState: state?.emotionalState,
   };
 }
 

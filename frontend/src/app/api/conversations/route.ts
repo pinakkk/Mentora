@@ -1,7 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-import { extractAndStoreFacts } from "@/server/memory/fact-extractor";
+import {
+  extractAndStoreFacts,
+  summarizeConversation,
+} from "@/server/memory/fact-extractor";
 
 function getServiceClient() {
   return createServiceClient(
@@ -25,7 +28,6 @@ export async function GET() {
 
   const serviceClient = getServiceClient();
 
-  // Get student
   const { data: student } = await serviceClient
     .from("students")
     .select("id")
@@ -36,7 +38,6 @@ export async function GET() {
     return NextResponse.json({ messages: [] });
   }
 
-  // Get the most recent conversation (single session per student)
   const { data: conversation } = await serviceClient
     .from("conversations")
     .select("id, messages")
@@ -71,7 +72,6 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
   const serviceClient = getServiceClient();
 
-  // Get student
   const { data: student } = await serviceClient
     .from("students")
     .select("id")
@@ -91,21 +91,15 @@ export async function POST(req: Request) {
     .limit(1)
     .single();
 
+  let conversationId: string;
+
   if (existing) {
-    // Update existing conversation
     await serviceClient
       .from("conversations")
       .update({ messages })
       .eq("id", existing.id);
-
-    // Async fact extraction — non-blocking (fire and forget)
-    if (messages.length >= 2) {
-      extractAndStoreFacts(student.id, messages).catch(() => {});
-    }
-
-    return NextResponse.json({ conversationId: existing.id });
+    conversationId = existing.id;
   } else {
-    // Create new conversation
     const { data: newConv, error } = await serviceClient
       .from("conversations")
       .insert({
@@ -117,15 +111,28 @@ export async function POST(req: Request) {
       .select("id")
       .single();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error || !newConv) {
+      return NextResponse.json({ error: error?.message || "insert failed" }, { status: 500 });
     }
-
-    // Async fact extraction — non-blocking
-    if (messages.length >= 2) {
-      extractAndStoreFacts(student.id, messages).catch(() => {});
-    }
-
-    return NextResponse.json({ conversationId: newConv.id });
+    conversationId = newConv.id;
   }
+
+  // ─── BACKGROUND WORK ─────────────────────────────────────
+  // `after()` keeps the serverless function alive past the response,
+  // so async fact extraction + summarization actually run to completion.
+  if (messages.length >= 2) {
+    const studentId = student.id;
+    after(async () => {
+      try {
+        await Promise.allSettled([
+          extractAndStoreFacts(studentId, messages),
+          summarizeConversation(studentId, conversationId, messages),
+        ]);
+      } catch (e) {
+        console.error("[conversations:after] background tasks failed:", e);
+      }
+    });
+  }
+
+  return NextResponse.json({ conversationId });
 }

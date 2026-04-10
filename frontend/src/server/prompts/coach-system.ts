@@ -43,6 +43,9 @@ ${context.pendingTasks}
 ## Deadlines
 ${context.upcomingDeadlines}
 
+## Emotional Signal
+${context.emotionalState ? `Detected state: ${context.emotionalState}. Adjust tone accordingly — if frustrated/anxious/burnout, reduce pressure, validate feelings, suggest a smaller step. If engaged, push a bit harder.` : "No signal yet."}
+
 ## Rules
 1. If NOT onboarded, guide them to upload resume and set goals.
 2. Use tools to ACT — don't just talk. Create tasks, store memories.

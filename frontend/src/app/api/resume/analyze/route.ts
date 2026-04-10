@@ -4,6 +4,10 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { chatModel } from "@/lib/ai/provider";
 import { generateText, Output, wrapLanguageModel, extractJsonMiddleware } from "ai";
 import { z } from "zod";
+import { parseResumeFromUrl } from "@/lib/pdf";
+import { rateLimitOrReject } from "@/lib/ratelimit";
+
+export const maxDuration = 60;
 
 function getServiceClient() {
   return createServiceClient(
@@ -35,6 +39,10 @@ export async function POST(req: Request) {
     } = await supabase.auth.getUser();
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Rate limit: resume analysis is the most expensive call (Sonnet + plan gen)
+    const rl = await rateLimitOrReject("resume", user.id);
+    if (rl) return rl;
 
     const { resumeUrl } = await req.json();
     if (!resumeUrl)
@@ -74,8 +82,31 @@ export async function POST(req: Request) {
       student = newStudent;
     }
 
-    // Use AI to analyze the resume
-    // Wrap model with extractJsonMiddleware to strip markdown code fences from response
+    // ─── REAL PDF PARSING ─────────────────────────────────
+    let resumeText = "";
+    let pdfPages = 0;
+    try {
+      const parsed = await parseResumeFromUrl(resumeUrl);
+      resumeText = parsed.text;
+      pdfPages = parsed.numPages;
+      if (!resumeText || resumeText.length < 50) {
+        return NextResponse.json(
+          { error: "Resume PDF appears empty or unreadable. Try re-uploading." },
+          { status: 422 }
+        );
+      }
+    } catch (err) {
+      console.error("[resume] PDF parse failed:", err);
+      return NextResponse.json(
+        {
+          error: "Could not read your resume PDF. Make sure the URL is publicly accessible and the file is a valid PDF.",
+          details: err instanceof Error ? err.message : String(err),
+        },
+        { status: 422 }
+      );
+    }
+
+    // Wrap the model to strip any stray markdown fences from JSON output.
     const wrappedModel = wrapLanguageModel({
       model: chatModel,
       middleware: extractJsonMiddleware(),
@@ -84,22 +115,27 @@ export async function POST(req: Request) {
     const result = await generateText({
       model: wrappedModel,
       output: Output.object({ schema: analysisSchema }),
-      prompt: `You are PlaceAI's Diagnostic Agent analyzing a student's resume for Indian campus placements.
+      prompt: `You are PlaceAI's Diagnostic Agent. Analyze this REAL resume text for an Indian campus placement context. Be specific — your analysis must reference what's actually in the resume, not generic advice.
 
-The student has uploaded their resume at: ${resumeUrl}
+# RESUME (extracted from PDF, ${pdfPages} page(s))
+"""
+${resumeText}
+"""
 
-Since you can't access the URL directly, generate a realistic analysis based on a typical Indian engineering student's resume.
-
+# YOUR TASK
 Return a JSON object with these fields:
-- skills: array of 8-12 objects with { name, level (0-10), confidence (0-1), source }
-- strengths: array of 3-5 strings
-- gaps: array of 3-5 strings (focus on what Indian campus companies look for)
-- readinessScore: number 0-100 (be realistic, most students are 30-60%)
-- recommendations: array of 3-5 actionable strings
+- skills:           8–12 objects { name, level (0-10), confidence (0-1), source }
+                    "source" should be a short evidence snippet from the resume
+                    (e.g. "AWS project Q3 2025", "DSA course 9.2 grade").
+                    Do NOT invent skills the resume doesn't mention.
+- strengths:        3–5 short phrases describing what stands out
+- gaps:             3–5 specific weaknesses (vs. what Indian campus tech
+                    companies look for: DSA, SQL, projects with measurable
+                    impact, CS fundamentals, communication evidence)
+- readinessScore:   0–100. Be honest, not flattering. Most students 30–60.
+- recommendations:  3–5 concrete next actions tailored to THIS resume.
 
-Consider skills like: DSA, SQL, Java/Python/JavaScript, System Design, Communication, DBMS, OS, CN, ML/AI, Web Development, Problem Solving, etc.
-
-Be honest but encouraging in your assessment.`,
+Return ONLY the JSON object — no markdown fences, no commentary.`,
     });
 
     const analysis = result.output;
@@ -117,6 +153,8 @@ Be honest but encouraging in your assessment.`,
         gaps: analysis.gaps,
         recommendations: analysis.recommendations,
         analyzedAt: new Date().toISOString(),
+        resumeChars: resumeText.length,
+        resumePages: pdfPages,
       },
     };
 
@@ -181,7 +219,10 @@ Be honest but encouraging in your assessment.`,
       console.error("Auto plan generation error (non-fatal):", planErr);
     }
 
-    return NextResponse.json(analysis);
+    return NextResponse.json({
+      ...analysis,
+      _meta: { resumePages: pdfPages, resumeChars: resumeText.length },
+    });
   } catch (err) {
     console.error("Resume analysis error:", err);
     return NextResponse.json(

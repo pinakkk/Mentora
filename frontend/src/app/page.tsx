@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage, AvatarGroup } from "@/components/primitives/avatar";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/primitives/tooltip";
 import { Open_Sans } from "next/font/google";
+import { landingPageText } from "@/config/landing-text";
+import type { LandingPageText } from "@/config/landing-text";
 
 const openSans = Open_Sans({
   subsets: ["latin"],
@@ -35,38 +37,6 @@ const openSans = Open_Sans({
   display: "swap",
 });
 
-const AVATARS = [
-  {
-    src: 'https://pbs.twimg.com/profile_images/1948770261848756224/oPwqXMD6_400x400.jpg',
-    fallback: 'SK',
-    tooltip: 'Skyleen',
-  },
-  {
-    src: 'https://pbs.twimg.com/profile_images/1593304942210478080/TUYae5z7_400x400.jpg',
-    fallback: 'CN',
-    tooltip: 'Shadcn',
-  },
-  {
-    src: 'https://pbs.twimg.com/profile_images/1677042510839857154/Kq4tpySA_400x400.jpg',
-    fallback: 'AW',
-    tooltip: 'Adam Wathan',
-  },
-  {
-    src: 'https://pbs.twimg.com/profile_images/1783856060249595904/8TfcCN0r_400x400.jpg',
-    fallback: 'GR',
-    tooltip: 'Guillermo Rauch',
-  },
-  {
-    src: 'https://pbs.twimg.com/profile_images/1534700564810018816/anAuSfkp_400x400.jpg',
-    fallback: 'JH',
-    tooltip: 'Jhey',
-  },
-  {
-    src: 'https://pbs.twimg.com/profile_images/1927474594102784000/Al0g-I6o_400x400.jpg',
-    fallback: 'DH',
-    tooltip: 'David Haz',
-  },
-];
 /* ── GSAP (tree-shakeable import) ─────────────────────────── */
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -86,6 +56,29 @@ const fadeUp = {
 
 const stagger = {
   visible: { transition: { staggerChildren: 0.09 } },
+};
+
+type PlatformFeature = {
+  icon: typeof Bot;
+  title: string;
+  desc: string;
+  color: string;
+  light: string;
+  preview: {
+    analyzingLabel?: string;
+    metricLabels?: readonly string[];
+    metricValues?: readonly number[];
+    scoreLabel?: string;
+    scoreValue?: string;
+    checklist?: readonly { l: string; t: "fix" | "good" }[];
+    question?: string;
+    inputPlaceholder?: string;
+    actions?: readonly string[];
+    planLabel?: string;
+    weekLabel?: string;
+    progressWidth?: string;
+    tasks?: readonly string[];
+  };
 };
 
 function SectionEyebrow({
@@ -241,16 +234,9 @@ export default function LandingPage() {
 /* ─────────────────────────────────────────────────────────── */
 
 function HeroSection() {
-  const typed = useTypewriter(["Software Engineer", "Data Analyst", "Product Manager", "UX Designer", "DevOps Engineer"], 70, 40, 2500);
+  const typed = useTypewriter([...landingPageText.hero.typedRoles], 70, 40, 2500);
 
-  const ALL_MESSAGES = useMemo(() => [
-    { role: "ai" as const, text: "Hey Priya! TCS posted a new JD — your match is 81%. They need SQL." },
-    { role: "user" as const, text: "That's amazing! Show me the plan." },
-    { role: "ai" as const, text: "I remember you struggled with JOINs. Day 1 starts there. Plan adjusted." },
-    { role: "user" as const, text: "How long is the prep plan?" },
-    { role: "ai" as const, text: "4 weeks. I've scheduled your first mock interview for tomorrow." },
-    { role: "user" as const, text: "Thanks! I'll review my notes today." },
-  ], []);
+  const ALL_MESSAGES = useMemo(() => [...landingPageText.hero.messages], []);
 
   type HeroMessage = {
     role: "ai" | "user";
@@ -300,34 +286,33 @@ function HeroSection() {
             {/* Left ─ copy */}
             <motion.div initial="hidden" animate="visible" variants={stagger} className="space-y-7">
               <motion.div variants={fadeUp}>
-                <SectionEyebrow>AI-powered Career Coach</SectionEyebrow>
+                <SectionEyebrow>{landingPageText.hero.eyebrow}</SectionEyebrow>
               </motion.div>
 
               <motion.h1 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.08] text-gray-900">
-                Your career deserves
+                {landingPageText.hero.headingStart}
                 <br />
-                prep that actually{" "}
+                {landingPageText.hero.headingEnd}{" "}
                 <span className="italic text-transparent bg-clip-text" style={{ backgroundImage: "linear-gradient(135deg, #7c5bf0, #a78bfa)" }}>
-                  works.
+                  {landingPageText.hero.headingAccent}
                 </span>
               </motion.h1>
 
               <motion.div variants={fadeUp} className="flex items-center gap-2 text-gray-400 text-sm sm:text-base">
-                <span>Preparing for</span>
+                <span>{landingPageText.hero.preparingLabel}</span>
                 <span className="text-gray-900 font-normal min-w-[180px] sm:min-w-[220px]">
                   {typed}<span className="animate-pulse" style={{ color: "var(--landing-accent)" }}>|</span>
                 </span>
               </motion.div>
 
               <motion.p variants={fadeUp} className="text-sm sm:text-base text-gray-500 max-w-md leading-relaxed font-light">
-                Real-time AI coaching, practice tailored to your dream company,
-                and offers — faster. No cheating, just proven prep.
+                {landingPageText.hero.description}
               </motion.p>
 
               <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-4">
                 <Link href="/login">
                   <Button size="lg" className="rounded-full px-7 sm:px-8 py-6 text-sm text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-shadow font-medium" style={{ background: "var(--landing-accent)" }}>
-                    Start Free Mock Interview
+                    {landingPageText.hero.primaryCta}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -335,7 +320,7 @@ function HeroSection() {
                   <span className="h-10 w-10 border border-gray-300 rounded-full flex items-center justify-center group-hover:border-gray-400 transition">
                     <Play className="h-3.5 w-3.5 ml-0.5 text-gray-500" />
                   </span>
-                  Research
+                  {landingPageText.hero.secondaryCta}
                 </Link>
               </motion.div>
 
@@ -343,7 +328,7 @@ function HeroSection() {
               <motion.div variants={fadeUp} className="flex items-center gap-4 pt-2">
                 <TooltipProvider delay={0}>
                   <AvatarGroup className="flex -space-x-3">
-                    {AVATARS.map((avatar, index) => (
+                    {landingPageText.avatars.map((avatar, index) => (
                       <Tooltip key={index}>
                         <TooltipTrigger>
                           <Avatar size="sm" className="size-10 sm:size-11 border-2 border-white ring-0 transition-transform hover:-translate-y-1 hover:scale-110 shadow-sm hover:shadow-md cursor-pointer relative z-0 hover:z-10 bg-white">
@@ -359,8 +344,8 @@ function HeroSection() {
                   </AvatarGroup>
                 </TooltipProvider>
                 <div className="flex flex-col justify-center">
-                  <p className="text-sm font-semibold text-gray-800 leading-tight">500+ students</p>
-                  <p className="text-xs text-gray-500 font-medium tracking-wide">placed this year</p>
+                  <p className="text-sm font-semibold text-gray-800 leading-tight">{landingPageText.hero.socialProofValue}</p>
+                  <p className="text-xs text-gray-500 font-medium tracking-wide">{landingPageText.hero.socialProofLabel}</p>
                 </div>
               </motion.div>
             </motion.div>
@@ -375,8 +360,8 @@ function HeroSection() {
                       <BotMessageSquareIcon className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-gray-900">PlaceAI Coach</p>
-                      <div className="flex items-center gap-1.5"><div className="h-1.5 w-1.5 rounded-full bg-emerald-400" /><p className="text-xs text-gray-400">Online now</p></div>
+                      <p className="font-semibold text-sm text-gray-900">{landingPageText.hero.coachName}</p>
+                      <div className="flex items-center gap-1.5"><div className="h-1.5 w-1.5 rounded-full bg-emerald-400" /><p className="text-xs text-gray-400">{landingPageText.hero.coachStatus}</p></div>
                     </div>
                   </div>
                   {/* messages */}
@@ -405,7 +390,7 @@ function HeroSection() {
                   {/* typing dots */}
                   <div className="mt-4 flex items-center gap-2">
                     <div className="flex gap-1">{[0, 1, 2].map((i) => (<motion.div key={i} className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--landing-accent)" }} animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />))}</div>
-                    <span className="text-xs text-gray-400">AI is thinking...</span>
+                    <span className="text-xs text-gray-400">{landingPageText.hero.thinkingLabel}</span>
                   </div>
                 </div>
               </TiltCard>
@@ -423,16 +408,7 @@ function HeroSection() {
 /* ─────────────────────────────────────────────────────────── */
 
 function InfinityTicker() {
-  const items = [
-    "MOCK INTERVIEWS",
-    "RESUME ANALYSIS",
-    "SKILL DIAGNOSTICS",
-    "PERSONALIZED PLANS",
-    "AI COACHING",
-    "COMPANY PREP",
-    "REAL-TIME FEEDBACK",
-    "PLACEMENT TRACKING",
-  ];
+  const items = landingPageText.ticker;
 
   return (
     <section className="py-5 border-b" style={{ background: "var(--surface)", borderColor: "rgba(0,0,0,0.06)" }} data-nav-theme="light">
@@ -460,11 +436,11 @@ function InfinityTicker() {
 
 function PlatformOverview() {
   const [active, setActive] = useState(0);
-  const features = [
-    { icon: Bot, title: "AI Career Coach", desc: "6 specialized agents that think, decide, and act — collaborating through shared memory to understand your unique journey.", color: "#7c5bf0", light: "rgba(124,91,240,0.08)" },
-    { icon: FileSearch, title: "Resume Deep Dive", desc: "AI-powered analysis with skill gap detection. Cross-references your claims with evidence and suggests improvements.", color: "#10b981", light: "rgba(16,185,129,0.08)" },
-    { icon: Users, title: "Mock Interviews", desc: "Company-specific, adaptive difficulty simulations with rubric-based scoring and real-time feedback.", color: "#8b5cf6", light: "rgba(139,92,246,0.08)" },
-    { icon: Route, title: "Personalized Plans", desc: "2/4/8-week prep plans mapped to your target companies, dynamically adjusting as you progress.", color: "#f59e0b", light: "rgba(245,158,11,0.08)" },
+  const features: PlatformFeature[] = [
+    { icon: Bot, ...landingPageText.platformOverview.features[0] },
+    { icon: FileSearch, ...landingPageText.platformOverview.features[1] },
+    { icon: Users, ...landingPageText.platformOverview.features[2] },
+    { icon: Route, ...landingPageText.platformOverview.features[3] },
   ];
 
   return (
@@ -472,15 +448,15 @@ function PlatformOverview() {
       <div className="mx-auto max-w-5xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center space-y-4 mb-16 sm:mb-20">
           <motion.div variants={fadeUp}>
-            <SectionEyebrow>Platform Overview</SectionEyebrow>
+            <SectionEyebrow>{landingPageText.platformOverview.eyebrow}</SectionEyebrow>
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-            Ethical AI Coaching, Built for
+            {landingPageText.platformOverview.titleStart}
             <br />
-            <span className="italic">Real Job Offers</span>
+            <span className="italic">{landingPageText.platformOverview.titleAccent}</span>
           </motion.h2>
           <motion.p variants={fadeUp} className="text-gray-500 max-w-2xl mx-auto text-base sm:text-lg">
-            Real skill growth, not memorized answers. PlaceAI delivers honest, goal-focused placement prep.
+            {landingPageText.platformOverview.description}
           </motion.p>
         </motion.div>
 
@@ -511,7 +487,7 @@ function PlatformOverview() {
           <TiltCard className="h-full">
             <div className="rounded-2xl p-6 sm:p-8 border h-full flex flex-col" style={{ background: "white", borderColor: "rgba(0,0,0,0.06)" }}>
               <div className="flex items-center gap-2 mb-6">
-                <SectionEyebrow className="tracking-[0.22em]">Live Preview</SectionEyebrow>
+                <SectionEyebrow className="tracking-[0.22em]">{landingPageText.platformOverview.previewEyebrow}</SectionEyebrow>
               </div>
 
               <AnimatePresence mode="wait">
@@ -521,17 +497,17 @@ function PlatformOverview() {
                       <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${features[active].color}, ${features[active].color}aa)` }}>
                         {(() => { const I = features[active].icon; return <I className="h-5 w-5 text-white" />; })()}
                       </div>
-                      <div><p className="font-semibold text-sm">{features[active].title}</p><p className="text-xs text-gray-400">Powered by 6 AI agents</p></div>
+                      <div><p className="font-semibold text-sm">{features[active].title}</p><p className="text-xs text-gray-400">{landingPageText.platformOverview.previewPoweredBy}</p></div>
                     </div>
 
                     {active === 0 && (
                       <div className="space-y-3">
-                        <div className="rounded-lg p-3" style={{ background: "rgba(124,91,240,0.05)" }}><p className="text-sm text-gray-700">Analyzing your profile across 6 dimensions...</p></div>
+                        <div className="rounded-lg p-3" style={{ background: "rgba(124,91,240,0.05)" }}><p className="text-sm text-gray-700">{features[active].preview.analyzingLabel!}</p></div>
                         <div className="grid grid-cols-3 gap-2">
-                          {["Technical", "Communication", "Problem Solving"].map((s, j) => (
+                          {features[active].preview.metricLabels!.map((s, j) => (
                             <div key={j} className="text-center p-2 rounded-lg" style={{ background: "rgba(124,91,240,0.06)" }}>
                               <p className="text-xs font-medium" style={{ color: "var(--landing-accent)" }}>{s}</p>
-                              <p className="text-lg font-bold" style={{ color: "#5b3ec4" }}>{[78, 85, 72][j]}%</p>
+                              <p className="text-lg font-bold" style={{ color: "#5b3ec4" }}>{features[active].preview.metricValues![j]}%</p>
                             </div>
                           ))}
                         </div>
@@ -540,27 +516,27 @@ function PlatformOverview() {
                     {active === 1 && (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: "rgba(16,185,129,0.06)" }}>
-                          <span className="text-sm font-medium text-emerald-700">Resume Score</span>
-                          <span className="text-lg font-bold text-emerald-700">7.4/10</span>
+                          <span className="text-sm font-medium text-emerald-700">{features[active].preview.scoreLabel!}</span>
+                          <span className="text-lg font-bold text-emerald-700">{features[active].preview.scoreValue!}</span>
                         </div>
-                        <div className="space-y-2">{[{ l: "Add quantified metrics", t: "fix" }, { l: "Projects well-structured", t: "good" }, { l: "Missing SQL in skills", t: "fix" }].map((item, j) => (<div key={j} className="flex items-center gap-2 text-sm"><div className={cn("h-1.5 w-1.5 rounded-full", item.t === "good" ? "bg-emerald-400" : "bg-amber-400")} /><span className="text-gray-600">{item.l}</span></div>))}</div>
+                        <div className="space-y-2">{features[active].preview.checklist!.map((item, j) => (<div key={j} className="flex items-center gap-2 text-sm"><div className={cn("h-1.5 w-1.5 rounded-full", item.t === "good" ? "bg-emerald-400" : "bg-amber-400")} /><span className="text-gray-600">{item.l}</span></div>))}</div>
                       </div>
                     )}
                     {active === 2 && (
                       <div className="space-y-3">
-                        <p className="text-sm text-gray-600">&quot;Could you explain load balancing vs caching?&quot;</p>
+                        <p className="text-sm text-gray-600">{features[active].preview.question!}</p>
                         <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                          <div className="flex-1 h-8 rounded-lg flex items-center px-3" style={{ background: "rgba(0,0,0,0.03)" }}><span className="text-xs text-gray-400">Type your answer...</span></div>
+                          <div className="flex-1 h-8 rounded-lg flex items-center px-3" style={{ background: "rgba(0,0,0,0.03)" }}><span className="text-xs text-gray-400">{features[active].preview.inputPlaceholder!}</span></div>
                           <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "var(--landing-accent)" }}><ArrowRight className="h-3.5 w-3.5 text-white" /></div>
                         </div>
-                        <div className="flex gap-2">{["Hint", "Skip", "Example"].map((a) => (<span key={a} className="px-2 py-1 rounded text-[10px] font-medium text-gray-500" style={{ background: "rgba(0,0,0,0.04)" }}>{a}</span>))}</div>
+                        <div className="flex gap-2">{features[active].preview.actions!.map((a) => (<span key={a} className="px-2 py-1 rounded text-[10px] font-medium text-gray-500" style={{ background: "rgba(0,0,0,0.04)" }}>{a}</span>))}</div>
                       </div>
                     )}
                     {active === 3 && (
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm"><span className="text-gray-500">4-week plan for TCS</span><span className="font-medium text-gray-900">Week 2 of 4</span></div>
-                        <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "rgba(245,158,11,0.12)" }}><div className="h-full w-[45%] rounded-full" style={{ background: "linear-gradient(90deg,#f59e0b,#fbbf24)" }} /></div>
-                        <div className="space-y-2">{["SQL JOINs mastery", "System design basics", "Behavioral prep"].map((t, j) => (<div key={j} className="flex items-center gap-2 text-sm"><CheckCircle2 className={cn("h-4 w-4", j === 0 ? "text-emerald-500" : "text-gray-300")} /><span className={j === 0 ? "text-gray-400 line-through" : "text-gray-700"}>{t}</span></div>))}</div>
+                        <div className="flex items-center justify-between text-sm"><span className="text-gray-500">{features[active].preview.planLabel!}</span><span className="font-medium text-gray-900">{features[active].preview.weekLabel!}</span></div>
+                        <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "rgba(245,158,11,0.12)" }}><div className="h-full rounded-full" style={{ width: features[active].preview.progressWidth!, background: "linear-gradient(90deg,#f59e0b,#fbbf24)" }} /></div>
+                        <div className="space-y-2">{features[active].preview.tasks!.map((t, j) => (<div key={j} className="flex items-center gap-2 text-sm"><CheckCircle2 className={cn("h-4 w-4", j === 0 ? "text-emerald-500" : "text-gray-300")} /><span className={j === 0 ? "text-gray-400 line-through" : "text-gray-700"}>{t}</span></div>))}</div>
                       </div>
                     )}
                   </div>
@@ -579,68 +555,24 @@ function PlatformOverview() {
 /* ─────────────────────────────────────────────────────────── */
 
 function PainPointsSection() {
-  const painCards = [
-    {
-      eyebrow: "Interview Confidence",
-      title: "No more interview anxiety or messy answers.",
-      subtitle:
-        "PlaceAI turns panic into preparation with guided mock rooms, clearer storytelling, and structured practice that matches real placement rounds.",
-      points: [
-        "No more interview anxiety",
-        "Forget about tricky questions",
-        "Stop struggling to structure answers",
-        "No more feeling unprepared",
-      ],
-      metric: {
-        value: "65%",
-        label: "less interview anxiety with AI coaching",
-      },
-      href: "/login",
-    },
-    {
-      eyebrow: "Application Clarity",
-      title: "Get noticed instead of getting ignored.",
-      subtitle:
-        "Sharper resumes, role-fit preparation, and feedback loops help you apply with intent instead of guessing what recruiters want.",
-      points: [
-        "Say bye to ignored applications",
-        "Skip the lack of feedback",
-      ],
-      metric: {
-        value: "50%",
-        label: "faster job placement rate",
-      },
-      href: "#how-it-works",
-    },
-    {
-      eyebrow: "Career Direction",
-      title: "Replace confusion with real placement momentum.",
-      subtitle:
-        "From salary expectations to self-belief, PlaceAI gives students a steady plan and honest signals on what to improve next.",
-      points: [
-        "Done with salary confusion",
-        "Break free from low confidence",
-      ],
-      metric: {
-        value: "70%",
-        label: "more confidence with structured feedback",
-      },
-      href: "#solutions",
-    },
-  ];
+  const painCards = landingPageText.painPoints.cards.map((card) => ({
+    ...card,
+    points: [...card.points],
+    metric: { ...card.metric },
+  }));
 
   return (
     <section className="py-24 sm:py-28" style={{ background: "white" }} data-nav-theme="light">
       <div className="mx-auto max-w-5xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-14 sm:mb-16">
           <motion.div variants={fadeUp}>
-            <SectionEyebrow>How We Help</SectionEyebrow>
+            <SectionEyebrow>{landingPageText.painPoints.eyebrow}</SectionEyebrow>
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mt-4">
-            We Solve Your Placement<br /><span className="italic">Struggles</span>
+            {landingPageText.painPoints.titleStart}<br /><span className="italic">{landingPageText.painPoints.titleAccent}</span>
           </motion.h2>
           <motion.p variants={fadeUp} className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-gray-500 sm:text-lg">
-            Clearer prep, stronger applications, and better feedback at every stage of placement season.
+            {landingPageText.painPoints.description}
           </motion.p>
         </motion.div>
 
@@ -660,56 +592,83 @@ function PainPointsSection() {
 /* ─────────────────────────────────────────────────────────── */
 
 function HowItWorksSection() {
-  const steps = [
-    { num: "01", title: "Discover Skills", desc: "Upload your resume and get AI-powered skill extraction with gap analysis. Our diagnostic agent cross-references your claims with actual evidence.", stat: "70%", statLabel: "discover hidden skill gaps", gradient: "linear-gradient(135deg,#7c5bf0,#a78bfa)", accent: "#7c5bf0" },
-    { num: "02", title: "Practice Smart", desc: "Company-specific mock interviews with adaptive difficulty. Get rubric-based scoring and detailed feedback after every session.", stat: "3x", statLabel: "more effective than solo prep", gradient: "linear-gradient(135deg,#7c5bf0,#6d28d9)", accent: "#6d28d9" },
-    { num: "03", title: "Get Placed", desc: "Your AI coach tracks progress, adjusts your plan, and proactively alerts you to opportunities that match your profile.", stat: "2x", statLabel: "faster placement rate", gradient: "linear-gradient(135deg,#6d28d9,#7c5bf0)", accent: "#7c5bf0" },
-  ];
+  const steps = landingPageText.howItWorks.steps;
 
   return (
-    <section id="how-it-works" className="py-24 sm:py-28" style={{ background: "var(--surface)" }} data-nav-theme="light">
-      <div className="mx-auto max-w-5xl px-5 sm:px-6">
+    <section
+      id="how-it-works"
+      className="relative overflow-hidden py-24 sm:py-28"
+      style={{
+        background:
+          "radial-gradient(circle at top, rgba(124,91,240,0.12) 0%, rgba(124,91,240,0.05) 24%, rgba(255,255,255,0) 52%), linear-gradient(180deg, #f7f3ff 0%, #fbf9ff 38%, var(--surface) 100%)",
+      }}
+      data-nav-theme="light"
+    >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.45),transparent_68%)]" />
+      <div className="mx-auto max-w-6xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-16 sm:mb-20">
           <motion.div variants={fadeUp}>
-            <SectionEyebrow>How It Works</SectionEyebrow>
+            <SectionEyebrow>{landingPageText.howItWorks.eyebrow}</SectionEyebrow>
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mt-4">
-            Three Simple Steps<br />to <span className="italic">Get Placed</span>
+            {landingPageText.howItWorks.titleStart}<br />A <span className="italic">{landingPageText.howItWorks.titleAccent}</span>
           </motion.h2>
           <motion.p variants={fadeUp} className="text-gray-500 max-w-2xl mx-auto mt-4 text-base sm:text-lg">
-            Refine skills, master interviews, and show your true potential.
+            {landingPageText.howItWorks.description}
           </motion.p>
         </motion.div>
 
         <div className="space-y-6">
           {steps.map((step, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} data-speed={i % 2 === 0 ? "0.15" : "-0.15"}>
-              <div className={cn("grid lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden border transition-shadow duration-500 hover:shadow-xl", i % 2 === 1 ? "lg:grid-flow-dense" : "")} style={{ borderColor: "rgba(0,0,0,0.06)" }}>
+              <div
+                className={cn(
+                  "grid lg:grid-cols-[0.92fr_1.08fr] gap-0 rounded-[32px] overflow-hidden border bg-white/70 shadow-[0_25px_80px_rgba(89,55,179,0.08)] transition-shadow duration-500 hover:shadow-[0_30px_100px_rgba(89,55,179,0.14)]",
+                  i % 2 === 1 ? "lg:grid-flow-dense" : "",
+                )}
+                style={{ borderColor: "rgba(0,0,0,0.06)" }}
+              >
                 {/* text */}
                 <div className={cn("p-8 sm:p-10 lg:p-14 flex flex-col justify-center bg-white", i % 2 === 1 ? "lg:col-start-2" : "")}>
                   <div className="flex items-center gap-3 mb-6">
-                    <span className="text-sm font-mono font-semibold" style={{ color: step.accent }}>{step.num}</span>
+                    <span
+                      className="inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em]"
+                      style={{ color: step.accent, background: `${step.accent}14` }}
+                    >
+                      {step.num}
+                    </span>
                     <div className="h-px flex-1 bg-gray-200" />
-                    <span className="text-xs text-gray-400">of 03</span>
+                    <span className="text-xs uppercase tracking-[0.2em] text-gray-400">{step.eyebrow}</span>
                   </div>
                   <h3 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">{step.title}</h3>
                   <p className="text-gray-500 mt-4 leading-relaxed max-w-lg">{step.desc}</p>
-                  <div className="mt-8 flex items-end gap-2">
+                  <div className="mt-7 flex flex-wrap gap-2">
+                    {step.highlights.map((highlight) => (
+                      <span
+                        key={highlight}
+                        className="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium text-gray-600"
+                        style={{ borderColor: `${step.accent}20`, background: `${step.accent}10` }}
+                      >
+                        {highlight}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-8 flex items-end gap-3">
                     <span className="text-4xl sm:text-5xl font-bold tracking-tight font-heading">{step.stat}</span>
-                    <span className="text-gray-400 text-sm mb-1">{step.statLabel}</span>
+                    <span className="text-gray-400 text-sm mb-1 max-w-[180px] leading-snug">{step.statLabel}</span>
                   </div>
                 </div>
                 {/* visual */}
-                <div className={cn("p-8 sm:p-10 lg:p-14 flex items-center justify-center min-h-[260px] sm:min-h-[300px]", i % 2 === 1 ? "lg:col-start-1" : "")} style={{ background: step.gradient }}>
-                  <div className="text-center text-white space-y-4">
-                    <span className="inline-block rounded-full px-3 py-1 text-xs font-medium" style={{ background: "rgba(255,255,255,0.2)" }}>Step {step.num}</span>
-                    <div className="flex justify-center">
-                      <div className="flex -space-x-3">{["PS", "RM", "AI", "VP"].map((ini, j) => (
-                        <motion.div key={j} initial={{ scale: 0 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 + j * 0.1, type: "spring" }} className="h-10 w-10 rounded-full bg-white/30 border-2 border-white/50 flex items-center justify-center text-xs font-semibold">{ini}</motion.div>
-                      ))}</div>
-                    </div>
-                    <p className="text-white/80 text-sm">Join 500+ students already benefiting</p>
-                  </div>
+                <div
+                  className={cn(
+                    "relative overflow-hidden p-8 sm:p-10 lg:p-14 flex items-center justify-center min-h-[320px] sm:min-h-[360px]",
+                    i % 2 === 1 ? "lg:col-start-1" : "",
+                  )}
+                  style={{ background: step.gradient }}
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.24),transparent_35%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.14),transparent_30%)]" />
+                  <HowItWorksVisual step={step} />
                 </div>
               </div>
             </motion.div>
@@ -720,19 +679,220 @@ function HowItWorksSection() {
   );
 }
 
+function HowItWorksVisual({
+  step,
+}: {
+  step: LandingPageText["howItWorks"]["steps"][number];
+}) {
+  if (step.visual === "scan") {
+    return (
+      <div className="relative w-full max-w-[430px] text-white">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="relative mx-auto flex h-[250px] w-[250px] items-center justify-center rounded-full border border-white/25 bg-[radial-gradient(circle,rgba(255,255,255,0.26)_0%,rgba(255,255,255,0.08)_50%,transparent_68%)]"
+        >
+          <div className="absolute inset-5 rounded-full border border-white/20" />
+          <div className="absolute inset-12 rounded-full border border-dashed border-white/20" />
+          {step.visualData.orbitLabels.map((label: string, index: number) => (
+            <motion.div
+              key={label}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 + index * 0.08 }}
+              className={cn(
+                "absolute rounded-full border border-white/25 bg-white/12 px-3 py-1.5 text-[11px] font-medium backdrop-blur-sm",
+                ["-left-2 top-10", "right-0 top-16", "left-5 bottom-8", "right-4 bottom-14"][index],
+              )}
+            >
+              {label}
+            </motion.div>
+          ))}
+          <div className="text-center">
+            <p className="text-[11px] uppercase tracking-[0.34em] text-white/70">{step.visualData.summaryEyebrow}</p>
+            <p className="mt-3 font-heading text-5xl font-bold tracking-tight">{step.visualData.summaryValue}</p>
+            <p className="mt-2 text-sm text-white/80">{step.visualData.summaryLabel}</p>
+          </div>
+        </motion.div>
+        <div className="mt-5 grid grid-cols-3 gap-3">
+          {step.visualData.metrics.map(([label, value], index) => (
+            <motion.div
+              key={label}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.25 + index * 0.08 }}
+              className="rounded-2xl border border-white/20 bg-white/12 p-3 text-center backdrop-blur-sm"
+            >
+              <p className="text-[10px] uppercase tracking-[0.24em] text-white/65">{label}</p>
+              <p className="mt-2 text-sm font-semibold text-white">{value}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (step.visual === "mock") {
+    return (
+      <div className="w-full max-w-[430px] text-white">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="rounded-[28px] border border-white/20 bg-white/12 p-4 backdrop-blur-md"
+        >
+          <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.28em] text-white/70">
+            <span>{step.visualData.topLeft}</span>
+            <span>{step.visualData.topRight}</span>
+          </div>
+          <p className="mt-4 max-w-sm text-xl font-semibold leading-snug text-white">
+            {step.visualData.question}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {step.visualData.tags.map((tag: string) => (
+              <span key={tag} className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-medium text-white/85">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </motion.div>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-[1.05fr_0.95fr]">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="rounded-[26px] border border-white/20 bg-black/10 p-4"
+          >
+            <p className="text-[11px] uppercase tracking-[0.26em] text-white/65">{step.visualData.responseLabel}</p>
+            <div className="mt-4 flex items-end gap-1.5 h-16">
+              {step.visualData.waveformHeights.map((height: number, index: number) => (
+                <motion.span
+                  key={index}
+                  initial={{ height: 8 }}
+                  whileInView={{ height }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.18 + index * 0.03, duration: 0.35 }}
+                  className="w-full rounded-full bg-white/70"
+                />
+              ))}
+            </div>
+            <div className="mt-4 rounded-2xl bg-white/12 p-3 text-sm leading-relaxed text-white/82">
+              {step.visualData.responseFeedback}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.16 }}
+            className="rounded-[26px] border border-white/20 bg-white/12 p-4 backdrop-blur-sm"
+          >
+            <p className="text-[11px] uppercase tracking-[0.26em] text-white/65">{step.visualData.rubricLabel}</p>
+            <div className="mt-4 space-y-3">
+              {step.visualData.rubric.map(([label, value]) => (
+                <div key={label}>
+                  <div className="mb-1 flex items-center justify-between text-sm text-white/82">
+                    <span>{label}</span>
+                    <span>{value}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-white/15">
+                    <div
+                      className="h-full rounded-full bg-white"
+                      style={{ width: value }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {step.visualData.notes.map((note: string) => (
+                <span key={note} className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-[#4f2cc8]">
+                  {note}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-[430px] text-white">
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="rounded-[28px] border border-white/20 bg-white/12 p-4 backdrop-blur-md"
+      >
+        <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.28em] text-white/70">
+          <span>{step.visualData.boardLeft}</span>
+          <span>{step.visualData.boardRight}</span>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          {step.visualData.companies.map(([company, fit]) => (
+            <div key={company} className="rounded-2xl border border-white/15 bg-black/10 p-3">
+              <p className="text-sm font-semibold text-white">{company}</p>
+              <p className="mt-1 text-xs text-white/70">{fit}</p>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.12 }}
+        className="mt-4 rounded-[28px] border border-white/20 bg-black/10 p-4"
+      >
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] uppercase tracking-[0.26em] text-white/65">{step.visualData.routeLabel}</p>
+          <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#155d62]">
+            {step.visualData.nextLabel}
+          </span>
+        </div>
+        <div className="mt-5 flex items-center gap-3">
+          {step.visualData.routeStages.map((stage: string, index: number) => (
+            <div key={stage} className="flex flex-1 items-center gap-3">
+              <div
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-full border text-xs font-semibold",
+                  index < 3 ? "border-white/35 bg-white text-[#155d62]" : "border-white/15 bg-white/10 text-white/72",
+                )}
+              >
+                {stage.slice(0, 2)}
+              </div>
+              {index < 3 && <div className="h-px flex-1 bg-white/30" />}
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 rounded-2xl bg-white/12 p-4">
+          <p className="text-sm text-white/80">{step.visualData.nudgeTime}</p>
+          <p className="mt-2 text-lg font-semibold leading-snug text-white">
+            {step.visualData.nudgeMessage}
+          </p>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────── */
 /*                     TESTIMONIALS                           */
 /* ─────────────────────────────────────────────────────────── */
 
 function TestimonialsSection() {
-  const testimonials = [
-    { name: "Priya Sharma", role: "CSE, Final Year", quote: "I used PlaceAI before applying to Infosys — and landed the role! The mock interviews felt so real.", company: "Infosys" },
-    { name: "Rahul Mehta", role: "Software Engineer", quote: "AI feedback gave me clarity and confidence. It felt like real interview prep in a safe space.", company: "TCS" },
-    { name: "Ananya Iyer", role: "ECE, Pre-final Year", quote: "The proactive nudges kept me on track. When I was slacking, my AI coach reached out first.", company: "Wipro" },
-    { name: "Vikram Patel", role: "IT, Final Year", quote: "Finally a tool that actually helps candidates shine. The company-specific prep was game-changing.", company: "Accenture" },
-    { name: "Sneha Reddy", role: "CSE, Final Year", quote: "After just two sessions, I improved how I present my projects. Incredible AI feedback loop.", company: "Amazon" },
-    { name: "Arjun Das", role: "Mech to IT switch", quote: "PlaceAI identified my transferable skills I didn't even know about. Got placed at Wipro!", company: "Wipro" },
-  ];
+  const testimonials = landingPageText.testimonials.items;
 
   return (
     <section id="testimonials" className="py-24 sm:py-28" style={{ background: "white" }} data-nav-theme="light">
@@ -740,10 +900,10 @@ function TestimonialsSection() {
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="flex flex-col md:flex-row md:items-end md:justify-between mb-14 sm:mb-16 gap-6">
           <div>
             <motion.div variants={fadeUp}>
-              <SectionEyebrow className="mb-4">Success Stories</SectionEyebrow>
+              <SectionEyebrow className="mb-4">{landingPageText.testimonials.eyebrow}</SectionEyebrow>
             </motion.div>
             <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-              500+ Students<br /><span className="italic">Landed Offers Faster</span>
+              {landingPageText.testimonials.titleStart}<br /><span className="italic">{landingPageText.testimonials.titleAccent}</span>
             </motion.h2>
           </div>
           <motion.div variants={fadeUp} className="flex items-center gap-4">
@@ -779,18 +939,17 @@ function TestimonialsSection() {
 /* ─────────────────────────────────────────────────────────── */
 
 function SolutionsSection() {
-  const studentFeatures = ["Personalized Mock Rooms", "Resume Optimizer", "Tailored Interview Plans", "Real-time AI Feedback"];
-  const adminFeatures = ["AI-Powered Coaching", "Custom Learning Paths", "Recruitment Insights", "University Readiness", "Dedicated B2B Support", "Upskill Talent"];
+  const { studentCard, adminCard } = landingPageText.solutions;
 
   return (
     <section id="solutions" className="py-24 sm:py-28" style={{ background: "var(--surface)" }} data-nav-theme="light">
       <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-14 sm:mb-16">
           <motion.div variants={fadeUp}>
-            <SectionEyebrow>Solutions</SectionEyebrow>
+            <SectionEyebrow>{landingPageText.solutions.eyebrow}</SectionEyebrow>
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mt-4">
-            Personalized AI Coaching That<br /><span className="italic">Scales From One to Many</span>
+            {landingPageText.solutions.titleStart}<br /><span className="italic">{landingPageText.solutions.titleAccent}</span>
           </motion.h2>
         </motion.div>
 
@@ -798,33 +957,33 @@ function SolutionsSection() {
           <TiltCard>
             <div className="rounded-3xl p-8 sm:p-10 space-y-8 h-full border-2 border-white shadow-xl shadow-purple-500/5" style={{ background: "var(--surface)" }}>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading text-xl sm:text-2xl font-bold text-gray-900">Personal AI Coach</h3>
-                <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium border-2 border-white shadow-sm" style={{ background: "rgba(124,91,240,0.06)", color: "var(--landing-accent)" }}>01</span>
+                <h3 className="font-heading text-xl sm:text-2xl font-bold text-gray-900">{studentCard.title}</h3>
+                <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium border-2 border-white shadow-sm" style={{ background: "rgba(124,91,240,0.06)", color: "var(--landing-accent)" }}>{studentCard.label}</span>
               </div>
-              <p className="text-gray-500 text-sm leading-relaxed">Your dedicated AI mentor that learns your strengths, weaknesses, and goals.</p>
-              <div className="space-y-3">{studentFeatures.map((f, i) => (
+              <p className="text-gray-500 text-sm leading-relaxed">{studentCard.description}</p>
+              <div className="space-y-3">{studentCard.features.map((f, i) => (
                 <div key={i} className="flex items-center justify-between p-3.5 rounded-xl border bg-white shadow-sm" style={{ borderColor: "rgba(0,0,0,0.05)" }}>
                   <span className="text-sm font-medium text-gray-700">{f}</span>
                   <CheckCircle2 className="h-4 w-4" style={{ color: "var(--landing-accent)" }} />
                 </div>
               ))}</div>
-              <Link href="/login"><Button className="rounded-full text-white mt-2" style={{ background: "var(--landing-accent)" }}>Boost My Prep <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
+              <Link href="/login"><Button className="rounded-full text-white mt-2" style={{ background: "var(--landing-accent)" }}>{studentCard.cta} <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
             </div>
           </TiltCard>
 
           <TiltCard>
             <div className="rounded-3xl p-8 sm:p-10 space-y-8 h-full border" style={{ background: "white", borderColor: "rgba(0,0,0,0.06)" }}>
               <div className="flex items-center justify-between">
-                <h3 className="font-heading text-xl sm:text-2xl font-bold">Batch Admin Dashboard</h3>
-                <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium border" style={{ borderColor: "rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.03)" }}>02</span>
+                <h3 className="font-heading text-xl sm:text-2xl font-bold">{adminCard.title}</h3>
+                <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium border" style={{ borderColor: "rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.03)" }}>{adminCard.label}</span>
               </div>
-              <p className="text-gray-500 text-sm leading-relaxed">Manage entire batches with AI insights. Track readiness, identify at-risk students.</p>
-              <div className="flex flex-wrap gap-2">{adminFeatures.map((f, i) => (
+              <p className="text-gray-500 text-sm leading-relaxed">{adminCard.description}</p>
+              <div className="flex flex-wrap gap-2">{adminCard.features.map((f, i) => (
                 <span key={i} className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium border" style={{ borderColor: "rgba(0,0,0,0.06)", background: "rgba(124,91,240,0.04)" }}>
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />{f}
                 </span>
               ))}</div>
-              <Link href="/login"><Button variant="outline" className="rounded-full mt-2">TPC Dashboard <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
+              <Link href="/login"><Button variant="outline" className="rounded-full mt-2">{adminCard.cta} <ArrowRight className="ml-1 h-4 w-4" /></Button></Link>
             </div>
           </TiltCard>
         </div>
@@ -838,40 +997,20 @@ function SolutionsSection() {
 /* ─────────────────────────────────────────────────────────── */
 
 function FAQSection() {
-  const [tab, setTab] = useState("General");
-  const tabs = ["General", "Features", "Interviews & Mock", "Technical", "Support"];
-  const faqs: Record<string, { q: string; a: string }[]> = {
-    General: [
-      { q: "What is PlaceAI?", a: "PlaceAI is an AI-powered platform with 6 specialized agents that help university students prepare for campus placements through personalized coaching, mock interviews, and proactive mentoring." },
-      { q: "How does the AI career coach work?", a: "PlaceAI uses 6 specialized AI agents (Diagnostic, Planner, Accountability, Mock Interview, Escalation, Memory) that collaborate through shared memory to provide personalized, context-aware coaching." },
-      { q: "Who can benefit from using PlaceAI?", a: "Any university student preparing for campus placements, especially those targeting IT/software companies. TPC coordinators also benefit from the admin dashboard for batch management." },
-      { q: "Is PlaceAI suitable for TPC admins as well?", a: "Yes! PlaceAI includes a dedicated TPC Admin Dashboard with batch readiness overview, at-risk student flags, skill-gap heatmaps, and AI-generated insights for the entire batch." },
-    ],
-    Features: [
-      { q: "What makes PlaceAI different from ChatGPT?", a: "Unlike ChatGPT, PlaceAI has persistent memory across sessions, proactively reaches out with nudges and opportunities, creates personalized prep plans, and adapts interviews to specific companies." },
-      { q: "How does the memory system work?", a: "PlaceAI uses a 3-layer memory system: working memory (current conversation), episodic memory (recent sessions cached in Redis), and semantic memory (permanent fact storage with vector embeddings in pgvector)." },
-    ],
-    "Interviews & Mock": [
-      { q: "How realistic are the mock interviews?", a: "Very realistic. Our Mock Interview Agent adapts questions based on the specific company's interview pattern, adjusts difficulty in real-time based on your answers, and provides rubric-based scoring with detailed feedback." },
-      { q: "Can I practice for specific companies?", a: "Yes! PlaceAI maintains company intelligence cards with extracted requirements, interview patterns, and culture notes. Mock interviews are tailored to each company's specific style." },
-    ],
-    Technical: [
-      { q: "What AI models does PlaceAI use?", a: "PlaceAI uses Claude Sonnet 4.6 for agent reasoning and coaching, Claude Haiku 4.5 for fast fact extraction, and OpenAI text-embedding-3-small for vector embeddings." },
-      { q: "Is my data secure?", a: "Yes. All data is stored in Supabase with Row Level Security (RLS). Your conversations and personal data are encrypted and never shared with other users." },
-    ],
-    Support: [
-      { q: "How do I get started?", a: "Sign up with your college email or Google account, upload your resume, and start chatting with your AI coach. The Diagnostic Agent will analyze your profile and create a personalized prep plan." },
-      { q: "Is PlaceAI free?", a: "PlaceAI offers a free tier with limited mock interviews and coaching sessions. Premium features include unlimited mocks, advanced analytics, and priority support." },
-    ],
-  };
+  const faqs = landingPageText.faq.items;
+  type FaqTab = (typeof landingPageText.faq.tabs)[number];
+  const [tab, setTab] = useState<FaqTab>(
+    landingPageText.faq.defaultTab as FaqTab
+  );
+  const tabs = landingPageText.faq.tabs as readonly FaqTab[];
 
   return (
     <section id="faq" className="py-24 sm:py-28" style={{ background: "white" }} data-nav-theme="light">
       <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <div className="max-w-2xl">
-          <SectionEyebrow className="mb-4">FAQ</SectionEyebrow>
-          <h2 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight">Got Questions?<br /><span className="italic">We&apos;ve Got Answers</span></h2>
-          <p className="text-gray-500 mt-3 max-w-lg">Everything students usually ask before starting mock interviews, coaching, and placement prep.</p>
+          <SectionEyebrow className="mb-4">{landingPageText.faq.eyebrow}</SectionEyebrow>
+          <h2 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight">{landingPageText.faq.titleStart}<br /><span className="italic">{landingPageText.faq.titleAccent}</span></h2>
+          <p className="text-gray-500 mt-3 max-w-lg">{landingPageText.faq.description}</p>
 
         </div>
         <div className="mt-8 rounded-[28px] border border-black/8 bg-[#fcfbff] p-4 sm:p-6">
@@ -891,7 +1030,7 @@ function FAQSection() {
           <AnimatePresence mode="wait">
             <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
               <Accordion type="single" collapsible className="mt-6 rounded-2xl border border-black/8 bg-white px-5 sm:px-6">
-                {(faqs[tab] || []).map((f, i) => (
+                {faqs[tab].map((f, i) => (
                   <AccordionItem key={i} value={`item-${i}`} className="py-2">
                     <AccordionTrigger className="gap-4 py-4 text-left text-base font-medium text-gray-900 hover:no-underline">{f.q}</AccordionTrigger>
                     <AccordionContent className="pb-4 pr-8 text-[15px] leading-7 text-gray-500">{f.a}</AccordionContent>
@@ -918,27 +1057,27 @@ function CTASection() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6 text-center relative z-10">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="space-y-8">
           <motion.div variants={fadeUp}>
-            <SectionEyebrow>Get Started Today</SectionEyebrow>
+            <SectionEyebrow>{landingPageText.cta.eyebrow}</SectionEyebrow>
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight">
-            Ready to Land Your<br /><span className="italic">Dream Placement?</span>
+            {landingPageText.cta.titleStart}<br /><span className="italic">{landingPageText.cta.titleAccent}</span>
           </motion.h2>
           <motion.p variants={fadeUp} className="text-gray-500 max-w-xl mx-auto text-base sm:text-lg">
-            Join hundreds of students who transformed their interview prep with AI-powered coaching.
+            {landingPageText.cta.description}
           </motion.p>
           <motion.div variants={fadeUp}>
-            <Link href="/login"><Button size="lg" className="rounded-full px-8 sm:px-10 py-6 text-sm sm:text-base shadow-xl text-white" style={{ background: "var(--landing-accent)" }}>Start Practicing Free <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
+            <Link href="/login"><Button size="lg" className="rounded-full px-8 sm:px-10 py-6 text-sm sm:text-base shadow-xl text-white" style={{ background: "var(--landing-accent)" }}>{landingPageText.cta.button} <ArrowRight className="ml-2 h-4 w-4" /></Button></Link>
           </motion.div>
           <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400">
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> No credit card required</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Free mock interviews</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Cancel anytime</span>
+            {landingPageText.cta.benefits.map((benefit) => (
+              <span key={benefit} className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> {benefit}</span>
+            ))}
           </motion.div>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.3 }} className="mt-16 sm:mt-20">
           <h3 className="font-heading text-7xl sm:text-8xl md:text-[10rem] font-bold tracking-tighter leading-none">
-            Place<span className="text-transparent bg-clip-text" style={{ backgroundImage: "linear-gradient(135deg,#c4b5fd,#7c5bf0)" }}>AI</span>
+            {landingPageText.cta.brandWordmark.slice(0, 5)}<span className="text-transparent bg-clip-text" style={{ backgroundImage: "linear-gradient(135deg,#c4b5fd,#7c5bf0)" }}>{landingPageText.cta.brandWordmark.slice(5)}</span>
           </h3>
         </motion.div>
       </div>
@@ -956,35 +1095,35 @@ function Footer() {
       <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-10 sm:gap-12 mb-14 sm:mb-16">
           <div className="space-y-4">
-            <div className="flex items-center gap-2"><div className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--landing-accent)" }} /><span className="font-heading text-lg font-semibold">PlaceAI</span></div>
-            <p className="text-sm text-white/40 max-w-xs leading-relaxed">Your AI-powered placement mentor. 6 agents, one mission — getting you placed.</p>
+            <div className="flex items-center gap-2"><div className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--landing-accent)" }} /><span className="font-heading text-lg font-semibold">{landingPageText.footer.brand}</span></div>
+            <p className="text-sm text-white/40 max-w-xs leading-relaxed">{landingPageText.footer.description}</p>
           </div>
           <div>
-            <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider text-white/60">Product</h4>
+            <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider text-white/60">{landingPageText.footer.productTitle}</h4>
             <ul className="space-y-3 text-sm text-white/40">
-              <li><Link href="#features" className="hover:text-white transition">Features</Link></li>
-              <li><Link href="/research" className="hover:text-white transition">Research</Link></li>
-              <li><Link href="#solutions" className="hover:text-white transition">Solutions</Link></li>
+              {landingPageText.footer.productLinks.map((link) => (
+                <li key={link.label}><Link href={link.href} className="hover:text-white transition">{link.label}</Link></li>
+              ))}
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider text-white/60">Resources</h4>
+            <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider text-white/60">{landingPageText.footer.resourcesTitle}</h4>
             <ul className="space-y-3 text-sm text-white/40">
-              <li><Link href="#faq" className="hover:text-white transition">FAQ</Link></li>
-              <li><Link href="#testimonials" className="hover:text-white transition">Success Stories</Link></li>
+              {landingPageText.footer.resourcesLinks.map((link) => (
+                <li key={link.label}><Link href={link.href} className="hover:text-white transition">{link.label}</Link></li>
+              ))}
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider text-white/60">Connect</h4>
-            <ul className="space-y-3 text-sm text-white/40"><li>Built for HackAI 2026</li><li>Powered by Claude AI</li></ul>
+            <h4 className="font-semibold mb-4 text-xs uppercase tracking-wider text-white/60">{landingPageText.footer.connectTitle}</h4>
+            <ul className="space-y-3 text-sm text-white/40">{landingPageText.footer.connectItems.map((item) => (<li key={item}>{item}</li>))}</ul>
           </div>
         </div>
         <div className="border-t border-white/8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/30">
-          <span>&copy; 2026 PlaceAI. Built with AI, for students who dream big.</span>
-          <div className="flex items-center gap-1.5"><div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "var(--landing-accent)" }} /><span className="text-xs">All systems operational</span></div>
+          <span>{landingPageText.footer.copyright}</span>
+          <div className="flex items-center gap-1.5"><div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "var(--landing-accent)" }} /><span className="text-xs">{landingPageText.footer.status}</span></div>
         </div>
       </div>
     </footer>
   );
 }
-
