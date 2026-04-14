@@ -8,14 +8,12 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Brain,
   Target,
   TrendingUp,
   Clock,
   Eye,
   ChevronDown,
   ChevronUp,
-  Sparkles,
   BarChart3,
   Lightbulb,
   ArrowRight,
@@ -531,13 +529,13 @@ export default function ResumePage() {
                     </>
                   ) : analyzing ? (
                     <>
-                      <Brain className="h-4 w-4 animate-pulse mr-2" />
-                      Analyzing & generating plan…
+                      <FileText className="h-4 w-4 mr-2" />
+                      Analyzing…
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Upload & Analyze
+                      <Upload className="h-4 w-4 mr-2" />
+                       Analyze now
                       <ArrowRight className="h-3.5 w-3.5 ml-2 opacity-70" />
                     </>
                   )}
@@ -756,11 +754,11 @@ export default function ResumePage() {
                                 className={`text-sm font-bold tabular-nums ${tone.text}`}
                               >
                                 {skill.level}
-                                <span className="text-[10px] text-gray-300 font-normal">
+                                <span className="text-[10px] text-black font-normal">
                                   /10
                                 </span>
                               </span>
-                              <span className="text-[10px] text-gray-300 tabular-nums">
+                              <span className="text-[10px] text-black tabular-nums">
                                 {Math.round(skill.confidence * 100)}%
                               </span>
                             </div>
