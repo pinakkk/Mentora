@@ -7,36 +7,44 @@ import { rateLimitOrReject } from "@/lib/ratelimit";
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
-  const { companyName, interviewType, difficulty } = await req.json();
-  const supabase = await createClient();
+  try {
+    const { companyName, interviewType, difficulty } = await req.json();
+    const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+    if (!user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const rl = await rateLimitOrReject("interview", user.id);
-  if (rl) return rl;
+    const rl = await rateLimitOrReject("interview", user.id);
+    if (rl) return rl;
 
-  const serviceClient = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+    if (!process.env.GROQ_API_KEY) {
+      return Response.json(
+        { error: "AI provider not configured (missing GROQ_API_KEY)." },
+        { status: 500 }
+      );
+    }
 
-  const { data: student } = await serviceClient
-    .from("students")
-    .select("*")
-    .eq("auth_id", user.id)
-    .single();
+    const serviceClient = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
-  const studentContext = student
-    ? `Name: ${student.name}\nDepartment: ${student.department || "N/A"}\nCGPA: ${student.cgpa || "N/A"}\nSkills: ${JSON.stringify(student.skills || [])}\nReadiness: ${student.readiness || 0}%`
-    : "New student — no profile data available.";
+    const { data: student } = await serviceClient
+      .from("students")
+      .select("*")
+      .eq("auth_id", user.id)
+      .single();
 
-  const prompt = `You are preparing a structured mock interview for a student.
+    const studentContext = student
+      ? `Name: ${student.name}\nDepartment: ${student.department || "N/A"}\nCGPA: ${student.cgpa || "N/A"}\nSkills: ${JSON.stringify(student.skills || [])}\nReadiness: ${student.readiness || 0}%`
+      : "New student — no profile data available.";
+
+    const prompt = `You are preparing a structured mock interview for a student.
 
 ## Context
 - Company: ${companyName}
@@ -76,28 +84,53 @@ The JSON must have this exact structure:
 - Make questions specific and realistic, not generic
 - The introduction should be warm and professional`;
 
-  const result = await generateText({
-    model: chatModel,
-    prompt,
-    temperature: 0.7,
-  });
-
-  try {
-    // Parse the JSON response, handling potential markdown code fences
-    let jsonText = result.text.trim();
-    if (jsonText.startsWith("```")) {
-      jsonText = jsonText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+    let result;
+    try {
+      result = await generateText({
+        model: chatModel,
+        prompt,
+        temperature: 0.7,
+      });
+    } catch (err) {
+      console.error("[interview/prepare] generateText failed:", err);
+      const message = err instanceof Error ? err.message : "Unknown AI provider error";
+      return Response.json(
+        { error: `AI provider error: ${message}` },
+        { status: 502 }
+      );
     }
-    const data = JSON.parse(jsonText);
 
-    return Response.json({
-      success: true,
-      studentId: student?.id,
-      ...data,
-    });
-  } catch {
+    try {
+      let jsonText = result.text.trim();
+      if (jsonText.startsWith("```")) {
+        jsonText = jsonText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+      }
+      const firstBrace = jsonText.indexOf("{");
+      const lastBrace = jsonText.lastIndexOf("}");
+      if (firstBrace > 0 || lastBrace < jsonText.length - 1) {
+        if (firstBrace >= 0 && lastBrace > firstBrace) {
+          jsonText = jsonText.slice(firstBrace, lastBrace + 1);
+        }
+      }
+      const data = JSON.parse(jsonText);
+
+      return Response.json({
+        success: true,
+        studentId: student?.id,
+        ...data,
+      });
+    } catch (err) {
+      console.error("[interview/prepare] JSON parse failed:", err, "raw:", result.text?.slice(0, 500));
+      return Response.json(
+        { error: "Failed to parse interview questions", raw: result.text },
+        { status: 500 }
+      );
+    }
+  } catch (err) {
+    console.error("[interview/prepare] unexpected error:", err);
+    const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json(
-      { error: "Failed to parse interview questions", raw: result.text },
+      { error: `Server error: ${message}` },
       { status: 500 }
     );
   }

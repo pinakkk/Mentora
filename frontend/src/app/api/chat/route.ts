@@ -2,22 +2,15 @@ import { streamText, stepCountIs, convertToModelMessages } from "ai";
 import { after } from "next/server";
 import { chatModel } from "@/lib/ai/provider";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { buildContext } from "@/server/memory/context-builder";
 import { buildCoachSystemPrompt } from "@/server/prompts/coach-system";
 import { createCoachTools } from "@/server/agents/tools";
 import { rateLimitOrReject } from "@/lib/ratelimit";
 import { touchInteraction } from "@/server/memory/episodic";
 import { detectAndStoreEmotion } from "@/server/agents/burnout-detector";
+import { getOrCreateStudent } from "@/server/db/students";
 
 export const maxDuration = 60;
-
-function getServiceClient() {
-  return createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -36,49 +29,19 @@ export async function POST(req: Request) {
   const rl = await rateLimitOrReject("chat", user.id);
   if (rl) return rl;
 
-  const serviceClient = getServiceClient();
-
-  // Get or create student record
-  let { data: student } = await serviceClient
-    .from("students")
-    .select("id")
-    .eq("auth_id", user.id)
-    .single();
-
-  if (!student) {
-    // Create student on first chat
-    const now = new Date().toISOString();
-    const { data: newStudent, error } = await serviceClient
-      .from("students")
-      .insert({
-        id: crypto.randomUUID(),
-        auth_id: user.id,
-        name:
-          user.user_metadata?.full_name ||
-          user.email?.split("@")[0] ||
-          "Student",
-        email: user.email!,
-        avatar_url: user.user_metadata?.avatar_url,
-        role: "student",
-        skills: [],
-        readiness: 0,
-        onboarded: false,
-        preferences: {},
-        created_at: now,
-        updated_at: now,
-      })
-      .select("id")
-      .single();
-
-    if (error || !newStudent) {
-      console.error("Failed to create student:", error);
-      return new Response(
-        JSON.stringify({ error: "Failed to create student", details: error?.message }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    student = newStudent;
+  // Get or create student record (race-safe upsert)
+  let student: { id: string };
+  try {
+    student = await getOrCreateStudent(user);
+  } catch (err) {
+    console.error("Failed to create student:", err);
+    return new Response(
+      JSON.stringify({
+        error: "Failed to create student",
+        details: err instanceof Error ? err.message : String(err),
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   // Convert UI messages (parts format) to model messages (content format)

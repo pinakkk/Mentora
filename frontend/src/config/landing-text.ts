@@ -426,7 +426,7 @@ export const landingPageText = {
       Technical: [
         {
           q: "What AI models does PlaceAI use?",
-          a: "PlaceAI uses Claude Sonnet 4.6 for all agent reasoning, coaching, and mock interview sessions. Claude Haiku 4.5 handles fast fact extraction and conversation summarization. OpenAI text-embedding-3-small generates vector embeddings for semantic memory and company RAG.",
+          a: "PlaceAI uses Claude Sonnet 4 for all agent reasoning, coaching, and mock interview sessions. Claude Haiku 4.5 handles fast fact extraction and conversation summarization. OpenAI text-embedding-3-small generates vector embeddings for semantic memory and company RAG.",
         },
         {
           q: "How is my data stored and secured?",
@@ -475,7 +475,7 @@ export const landingPageText = {
       { label: "TPC Dashboard", href: "/admin" },
     ],
     connectTitle: "Connect",
-    connectItems: ["Built for HackAI 2026", "Powered by Claude Sonnet 4.6", "Multi-agent · Memory-first"],
+    connectItems: ["Built for HackAI 2026", "Powered by Claude Sonnet 4", "Multi-agent · Memory-first"],
     copyright: "© 2026 PlaceAI. Built with AI, for students who dream big.",
     status: "All systems operational",
   },

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { getOrCreateStudent } from "@/server/db/students";
 
 export async function POST(req: Request) {
   try {
@@ -37,35 +38,18 @@ export async function POST(req: Request) {
       .from("resumes")
       .getPublicUrl(data.path);
 
-    // Ensure student record exists, then update resume URL
-    const { data: existingStudent } = await serviceClient
-      .from("students")
-      .select("id")
-      .eq("auth_id", user.id)
-      .single();
-
-    if (!existingStudent) {
-      const now = new Date().toISOString();
-      await serviceClient.from("students").insert({
-        id: crypto.randomUUID(),
-        auth_id: user.id,
-        name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Student",
-        email: user.email!,
-        avatar_url: user.user_metadata?.avatar_url,
-        resume_url: urlData.publicUrl,
-        role: "student",
-        skills: [],
-        readiness: 0,
-        onboarded: false,
-        preferences: {},
-        created_at: now,
-        updated_at: now,
-      });
-    } else {
-      await serviceClient
-        .from("students")
-        .update({ resume_url: urlData.publicUrl })
-        .eq("auth_id", user.id);
+    // Ensure student record exists (race-safe) and persist the new resume URL.
+    try {
+      await getOrCreateStudent(user, { resume_url: urlData.publicUrl }, serviceClient);
+    } catch (err) {
+      console.error("Failed to create student:", err);
+      return NextResponse.json(
+        {
+          error: "Failed to create student",
+          details: err instanceof Error ? err.message : String(err),
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ url: urlData.publicUrl, path: data.path });

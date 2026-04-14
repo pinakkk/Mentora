@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { chatModel } from "@/lib/ai/provider";
@@ -6,6 +6,7 @@ import { generateText, Output, wrapLanguageModel, extractJsonMiddleware } from "
 import { z } from "zod";
 import { parseResumeFromUrl } from "@/lib/pdf";
 import { rateLimitOrReject } from "@/lib/ratelimit";
+import { getOrCreateStudent } from "@/server/db/students";
 
 export const maxDuration = 60;
 
@@ -16,20 +17,28 @@ function getServiceClient() {
   );
 }
 
+// NOTE: do NOT use .min()/.max() on z.number() here. The Vercel AI SDK
+// translates those into JSON-schema `minimum`/`maximum`, which OpenRouter's
+// Azure provider rejects with "For 'number' type, properties maximum, minimum
+// are not supported". The bounds are described in the prompt and clamped
+// after the fact below.
 const analysisSchema = z.object({
   skills: z.array(
     z.object({
       name: z.string(),
-      level: z.number().min(0).max(10),
-      confidence: z.number().min(0).max(1),
+      level: z.number().describe("0-10"),
+      confidence: z.number().describe("0-1"),
       source: z.string(),
     })
   ),
   strengths: z.array(z.string()),
   gaps: z.array(z.string()),
-  readinessScore: z.number().min(0).max(100),
+  readinessScore: z.number().describe("0-100"),
   recommendations: z.array(z.string()),
 });
+
+const clamp = (n: number, lo: number, hi: number) =>
+  Math.max(lo, Math.min(hi, n));
 
 export async function POST(req: Request) {
   try {
@@ -50,36 +59,19 @@ export async function POST(req: Request) {
 
     const serviceClient = getServiceClient();
 
-    // Get or create student
-    let { data: student } = await serviceClient
-      .from("students")
-      .select("id")
-      .eq("auth_id", user.id)
-      .single();
-
-    if (!student) {
-      const now = new Date().toISOString();
-      const { data: newStudent, error: createErr } = await serviceClient
-        .from("students")
-        .insert({
-          id: crypto.randomUUID(),
-          auth_id: user.id,
-          name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Student",
-          email: user.email!,
-          avatar_url: user.user_metadata?.avatar_url,
-          role: "student",
-          skills: [],
-          readiness: 0,
-          onboarded: false,
-          preferences: {},
-          created_at: now,
-          updated_at: now,
-        })
-        .select("id")
-        .single();
-      if (createErr || !newStudent)
-        return NextResponse.json({ error: "Failed to create student" }, { status: 500 });
-      student = newStudent;
+    // Get or create student (race-safe upsert)
+    let student: { id: string };
+    try {
+      student = await getOrCreateStudent(user, {}, serviceClient);
+    } catch (err) {
+      console.error("Failed to create student:", err);
+      return NextResponse.json(
+        {
+          error: "Failed to create student",
+          details: err instanceof Error ? err.message : String(err),
+        },
+        { status: 500 }
+      );
     }
 
     // ─── REAL PDF PARSING ─────────────────────────────────
@@ -138,13 +130,25 @@ Return a JSON object with these fields:
 Return ONLY the JSON object — no markdown fences, no commentary.`,
     });
 
-    const analysis = result.output;
-    if (!analysis) {
+    const rawAnalysis = result.output;
+    if (!rawAnalysis) {
       return NextResponse.json(
         { error: "Failed to generate analysis" },
         { status: 500 }
       );
     }
+
+    // Clamp numeric ranges (the JSON-schema bounds were stripped to satisfy
+    // OpenRouter's Azure provider, so we enforce them here instead).
+    const analysis = {
+      ...rawAnalysis,
+      skills: rawAnalysis.skills.map((s) => ({
+        ...s,
+        level: clamp(s.level, 0, 10),
+        confidence: clamp(s.confidence, 0, 1),
+      })),
+      readinessScore: clamp(rawAnalysis.readinessScore, 0, 100),
+    };
 
     // Update student profile with extracted skills and full analysis
     const updatedPreferences = {
@@ -204,20 +208,26 @@ Return ONLY the JSON object — no markdown fences, no commentary.`,
       console.error("Memory storage error (non-fatal):", memoryErr);
     }
 
-    // Auto-generate prep plan based on the latest analysis (non-blocking on failure)
-    try {
-      const { generatePlanForStudent } = await import(
-        "@/server/agents/plan-generator"
-      );
-      await generatePlanForStudent({
-        id: student.id,
-        skills: analysis.skills,
-        readiness: analysis.readinessScore,
-        preferences: updatedPreferences,
-      });
-    } catch (planErr) {
-      console.error("Auto plan generation error (non-fatal):", planErr);
-    }
+    // Auto-generate prep plan AFTER the response is sent so the client gets the
+    // analysis immediately. Plan generation is a second Sonnet call that can take
+    // 10–30s; awaiting it here used to push the route past Vercel's maxDuration
+    // and the client never saw the analysis (it only appeared after a refresh,
+    // because the DB writes above had already succeeded).
+    after(async () => {
+      try {
+        const { generatePlanForStudent } = await import(
+          "@/server/agents/plan-generator"
+        );
+        await generatePlanForStudent({
+          id: student.id,
+          skills: analysis.skills,
+          readiness: analysis.readinessScore,
+          preferences: updatedPreferences,
+        });
+      } catch (planErr) {
+        console.error("Auto plan generation error (non-fatal):", planErr);
+      }
+    });
 
     return NextResponse.json({
       ...analysis,

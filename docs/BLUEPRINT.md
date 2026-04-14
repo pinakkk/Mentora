@@ -538,7 +538,7 @@ EXAMPLE: Complete Onboarding Flow
 │              │  └────────────┘  └──────────────────┘ │             │
 │              └───────────────────┬────────────────────┘             │
 │                                  │                                   │
-│                    Claude API (Sonnet 4.6 + Haiku 4.5)              │
+│                    Claude API (Sonnet 4 + Haiku 4.5)                │
 │                    Vercel AI SDK (streaming + tool calling)          │
 └──────────────────────────────────┼──────────────────────────────────┘
                                    │
@@ -594,7 +594,7 @@ EXAMPLE: Complete Onboarding Flow
 | **Vector DB** | Supabase pgvector | Semantic memory search, RAG |
 | **Cache** | Upstash Redis | Rate limiting, caching, job queue |
 | **Auth** | Supabase Auth (GoTrue) | Google OAuth + email/password |
-| **AI LLM** | Claude Sonnet 4.6 | Agent reasoning, coaching, interviews |
+| **AI LLM** | Claude Sonnet 4 | Agent reasoning, coaching, interviews |
 | **AI Extraction** | Claude Haiku 4.5 | Cheap/fast fact extraction, summarization |
 | **Embeddings** | OpenAI text-embedding-3-small | Text-to-vector for memory & RAG |
 | **AI SDK** | Vercel AI SDK (`ai` + `@ai-sdk/anthropic`) | Streaming, tool calling, useChat hook |
