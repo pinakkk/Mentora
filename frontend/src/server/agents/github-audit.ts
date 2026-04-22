@@ -15,10 +15,40 @@ function ghHeaders(): HeadersInit {
     "User-Agent": "Mentora-Diagnostic-Agent",
     "X-GitHub-Api-Version": "2022-11-28",
   };
-  if (process.env.GITHUB_TOKEN) {
-    headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
   return headers;
+}
+
+function isRateLimited(res: Response): boolean {
+  if (res.status !== 403 && res.status !== 429) return false;
+  const remaining = res.headers.get("x-ratelimit-remaining");
+  return remaining === "0" || res.status === 429;
+}
+
+function rateLimitMessage(res: Response): string {
+  const resetHeader = res.headers.get("x-ratelimit-reset");
+  const authed = Boolean(process.env.GITHUB_TOKEN || process.env.GH_TOKEN);
+  let when = "";
+  if (resetHeader) {
+    const secs = Math.max(0, Number(resetHeader) * 1000 - Date.now()) / 1000;
+    if (Number.isFinite(secs) && secs > 0) {
+      when = ` Resets in ~${Math.ceil(secs / 60)} min.`;
+    }
+  }
+  return authed
+    ? `GitHub rate limit reached for the configured token.${when}`
+    : `GitHub rate limit reached (60 req/hr unauthenticated).${when} Ask the admin to set GITHUB_TOKEN to raise the limit to 5000/hr.`;
+}
+
+async function ghFetch(url: string): Promise<Response> {
+  const res = await fetch(url, { headers: ghHeaders(), cache: "no-store" });
+  if (isRateLimited(res)) {
+    throw new Error(rateLimitMessage(res));
+  }
+  return res;
 }
 
 export interface GitHubRepoSummary {
@@ -53,20 +83,19 @@ export async function auditGitHub(usernameOrUrl: string): Promise<GitHubAudit> {
     throw new Error(`Could not parse a GitHub username from: ${usernameOrUrl}`);
   }
 
-  const profileRes = await fetch(`${GH_BASE}/users/${username}`, {
-    headers: ghHeaders(),
-    cache: "no-store",
-  });
+  const profileRes = await ghFetch(`${GH_BASE}/users/${username}`);
   if (!profileRes.ok) {
+    if (profileRes.status === 404) {
+      throw new Error(`GitHub user "${username}" not found.`);
+    }
     throw new Error(
       `GitHub profile fetch failed: ${profileRes.status} ${profileRes.statusText}`
     );
   }
   const profile = await profileRes.json();
 
-  const reposRes = await fetch(
-    `${GH_BASE}/users/${username}/repos?per_page=100&sort=updated`,
-    { headers: ghHeaders(), cache: "no-store" }
+  const reposRes = await ghFetch(
+    `${GH_BASE}/users/${username}/repos?per_page=100&sort=updated`
   );
   if (!reposRes.ok) {
     throw new Error(
