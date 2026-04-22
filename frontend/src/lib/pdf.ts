@@ -12,6 +12,8 @@ export interface ParsedResume {
   text: string;
   numPages: number;
   truncated: boolean;
+  /** SHA-256 of the raw PDF bytes — hex. Used as a cache key. */
+  contentHash: string;
 }
 
 const MAX_RESUME_CHARS = 18_000; // ~5–6k tokens; plenty for a CV
@@ -23,7 +25,10 @@ const MAX_RESUME_CHARS = 18_000; // ~5–6k tokens; plenty for a CV
  * a 4xx/5xx Response.
  */
 export async function parseResumeFromUrl(url: string): Promise<ParsedResume> {
-  const res = await fetch(url, { cache: "no-store" });
+  // Allow CDN caching — the storage URL is content-addressed by upload timestamp
+  // so the bytes never change for a given URL. `no-store` was blocking reuse
+  // between the upload and the analyze round-trip.
+  const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Failed to fetch resume PDF: ${res.status} ${res.statusText}`);
   }
@@ -45,21 +50,40 @@ export async function parseResumeFromUrl(url: string): Promise<ParsedResume> {
 export async function parseResumeFromBuffer(
   bytes: Uint8Array
 ): Promise<ParsedResume> {
-  const pdf = await getDocumentProxy(bytes);
-  const result = await extractText(pdf, { mergePages: true });
+  // Hash and parse in parallel — both are independent CPU/IO work.
+  const [contentHash, parsed] = await Promise.all([
+    sha256Hex(bytes),
+    (async () => {
+      const pdf = await getDocumentProxy(bytes);
+      return extractText(pdf, { mergePages: true });
+    })(),
+  ]);
 
   // unpdf returns either a string (mergePages=true) or string[] (mergePages=false).
   // We asked for merged so it should be a string, but be defensive.
-  const fullText = Array.isArray(result.text) ? result.text.join("\n\n") : result.text;
+  const fullText = Array.isArray(parsed.text) ? parsed.text.join("\n\n") : parsed.text;
   const cleaned = normalizeWhitespace(fullText);
   const truncated = cleaned.length > MAX_RESUME_CHARS;
   const text = truncated ? cleaned.slice(0, MAX_RESUME_CHARS) : cleaned;
 
   return {
     text,
-    numPages: result.totalPages,
+    numPages: parsed.totalPages,
     truncated,
+    contentHash,
   };
+}
+
+async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  // Copy into a fresh ArrayBuffer — Uint8Array<ArrayBufferLike> (which may
+  // be backed by SharedArrayBuffer) isn't assignable to SubtleCrypto's
+  // BufferSource under strict TS settings.
+  const ab = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(ab).set(bytes);
+  const digest = await crypto.subtle.digest("SHA-256", ab);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function normalizeWhitespace(s: string): string {

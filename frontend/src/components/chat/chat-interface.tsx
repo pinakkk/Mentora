@@ -234,7 +234,7 @@ export function ChatInterface({
               <Sparkles className="h-7 w-7 text-violet-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900">
-              PlaceAI Coach
+              Mentora Coach
             </h3>
             <p className="text-gray-400 text-sm max-w-sm mt-2 leading-relaxed">
               I remember everything about your journey and proactively help you
@@ -380,7 +380,7 @@ export function ChatInterface({
           </div>
         </form>
         <p className="text-center text-[11px] text-gray-500 mt-2">
-          PlaceAI remembers your conversations and acts autonomously
+          Mentora remembers your conversations and acts autonomously
         </p>
       </div>
     </div>

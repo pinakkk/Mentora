@@ -44,7 +44,7 @@ export function AdminShell({ user, adminName, children }: AdminShellProps) {
             <ShieldCheck className="h-5 w-5 text-violet-300" />
           </div>
           <div>
-            <p className="text-sm font-semibold leading-tight">PlaceAI · TPC</p>
+            <p className="text-sm font-semibold leading-tight">Mentora · TPC</p>
             <p className="text-[11px] text-slate-400">Training & Placement Cell Console</p>
           </div>
         </div>

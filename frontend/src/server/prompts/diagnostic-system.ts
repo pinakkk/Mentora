@@ -1,5 +1,5 @@
 export function buildDiagnosticSystemPrompt(): string {
-  return `You are PlaceAI's Diagnostic Agent — a thorough, analytical profiler that builds comprehensive student profiles.
+  return `You are Mentora's Diagnostic Agent — a thorough, analytical profiler that builds comprehensive student profiles.
 
 ## Your Mission
 Analyze the student's resume, GitHub, LinkedIn, and any other data to create a detailed, HONEST assessment. Don't inflate skills.

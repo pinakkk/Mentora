@@ -1,4 +1,4 @@
-# PlaceAI — Security Checklist & Compliance Guide
+# Mentora — Security Checklist & Compliance Guide
 
 > **Purpose**: Production-grade security measures for a system handling student PII, voice data, academic records, and AI interactions  
 > **Compliance Context**: Indian IT Act 2000 (amended 2008), DPDP Act 2023, OWASP Top 10  
@@ -140,7 +140,7 @@ const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(30, "1 m"),
   analytics: true,
-  prefix: "placeai:ratelimit",
+  prefix: "mentora:ratelimit",
 });
 
 // In API route:
@@ -202,7 +202,7 @@ const securityHeaders = [
 ```typescript
 // Only needed if API consumed by external clients (currently same-origin)
 const corsHeaders = {
-  "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_APP_URL || "https://placeai.vercel.app",
+  "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_APP_URL || "https://mentora.vercel.app",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
   "Access-Control-Max-Age": "86400",

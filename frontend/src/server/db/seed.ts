@@ -1,5 +1,5 @@
 /**
- * Seed script for PlaceAI demo data.
+ * Seed script for Mentora demo data.
  * Run with: npm run seed
  */
 

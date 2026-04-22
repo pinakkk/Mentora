@@ -40,6 +40,29 @@ const analysisSchema = z.object({
 const clamp = (n: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, n));
 
+type Analysis = z.infer<typeof analysisSchema>;
+type CachedAnalysis = {
+  analysis: Analysis;
+  analyzedAt: string;
+  resumeChars: number;
+  resumePages: number;
+};
+
+// Keep only the `max` most-recently-analyzed entries so the JSONB blob on
+// the students row stays bounded.
+function trimCache(
+  cache: Record<string, CachedAnalysis>,
+  max: number
+): Record<string, CachedAnalysis> {
+  const entries = Object.entries(cache);
+  if (entries.length <= max) return cache;
+  entries.sort(
+    ([, a], [, b]) =>
+      new Date(b.analyzedAt).getTime() - new Date(a.analyzedAt).getTime()
+  );
+  return Object.fromEntries(entries.slice(0, max));
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = await createClient();
@@ -74,13 +97,27 @@ export async function POST(req: Request) {
       );
     }
 
-    // ─── REAL PDF PARSING ─────────────────────────────────
+    // Parse the PDF and fetch the student's existing preferences in parallel.
+    // Both are needed before we can decide cache hit/miss, and they're
+    // independent — overlapping them saves a round-trip on every request.
     let resumeText = "";
     let pdfPages = 0;
+    let contentHash = "";
+    let existingPrefs: Record<string, unknown> = {};
     try {
-      const parsed = await parseResumeFromUrl(resumeUrl);
+      const [parsed, prefsRes] = await Promise.all([
+        parseResumeFromUrl(resumeUrl),
+        serviceClient
+          .from("students")
+          .select("preferences")
+          .eq("id", student.id)
+          .maybeSingle(),
+      ]);
       resumeText = parsed.text;
       pdfPages = parsed.numPages;
+      contentHash = parsed.contentHash;
+      existingPrefs =
+        (prefsRes.data?.preferences as Record<string, unknown> | null) || {};
       if (!resumeText || resumeText.length < 50) {
         return NextResponse.json(
           { error: "Resume PDF appears empty or unreadable. Try re-uploading." },
@@ -98,6 +135,25 @@ export async function POST(req: Request) {
       );
     }
 
+    // ─── CACHE LOOKUP ─────────────────────────────────────
+    // Keyed by SHA-256 of the raw PDF bytes. If the student has already
+    // analyzed this exact file, return the stored result and skip the LLM
+    // call entirely — same bytes must produce the same analysis.
+    const cache =
+      (existingPrefs.analysisCache as Record<string, CachedAnalysis> | undefined) || {};
+    const cached = cache[contentHash];
+    if (cached) {
+      return NextResponse.json({
+        ...cached.analysis,
+        _meta: {
+          resumePages: cached.resumePages,
+          resumeChars: cached.resumeChars,
+          cached: true,
+          cachedAt: cached.analyzedAt,
+        },
+      });
+    }
+
     // Wrap the model to strip any stray markdown fences from JSON output.
     const wrappedModel = wrapLanguageModel({
       model: chatModel,
@@ -107,7 +163,7 @@ export async function POST(req: Request) {
     const result = await generateText({
       model: wrappedModel,
       output: Output.object({ schema: analysisSchema }),
-      prompt: `You are PlaceAI's Diagnostic Agent. Analyze this REAL resume text for an Indian campus placement context. Be specific — your analysis must reference what's actually in the resume, not generic advice.
+      prompt: `You are Mentora's Diagnostic Agent. Analyze this REAL resume text for an Indian campus placement context. Be specific — your analysis must reference what's actually in the resume, not generic advice.
 
 # RESUME (extracted from PDF, ${pdfPages} page(s))
 """
@@ -150,16 +206,31 @@ Return ONLY the JSON object — no markdown fences, no commentary.`,
       readinessScore: clamp(rawAnalysis.readinessScore, 0, 100),
     };
 
-    // Update student profile with extracted skills and full analysis
+    // Update student profile with extracted skills and full analysis.
+    // Merge into existing preferences (don't clobber other keys) and append
+    // this analysis into the per-hash cache, capped to the 5 most recent
+    // entries so the JSONB blob stays bounded.
+    const analyzedAt = new Date().toISOString();
+    const lastAnalysis = {
+      strengths: analysis.strengths,
+      gaps: analysis.gaps,
+      recommendations: analysis.recommendations,
+      analyzedAt,
+      resumeChars: resumeText.length,
+      resumePages: pdfPages,
+      contentHash,
+    };
+    const cacheEntry: CachedAnalysis = {
+      analysis,
+      analyzedAt,
+      resumeChars: resumeText.length,
+      resumePages: pdfPages,
+    };
+    const nextCache = trimCache({ ...cache, [contentHash]: cacheEntry }, 5);
     const updatedPreferences = {
-      lastAnalysis: {
-        strengths: analysis.strengths,
-        gaps: analysis.gaps,
-        recommendations: analysis.recommendations,
-        analyzedAt: new Date().toISOString(),
-        resumeChars: resumeText.length,
-        resumePages: pdfPages,
-      },
+      ...existingPrefs,
+      lastAnalysis,
+      analysisCache: nextCache,
     };
 
     await serviceClient
@@ -172,66 +243,66 @@ Return ONLY the JSON object — no markdown fences, no commentary.`,
       })
       .eq("id", student.id);
 
-    // Store key findings as memory facts (non-blocking — don't fail the response)
-    try {
-      const { memoryManager } = await import("@/server/memory/manager");
-
-      await Promise.all([
-        memoryManager.storeFact(
-          student.id,
-          `Readiness score: ${analysis.readinessScore}%. Top skills: ${analysis.skills
-            .sort((a, b) => b.level - a.level)
-            .slice(0, 3)
-            .map((s) => `${s.name} (${s.level}/10)`)
-            .join(", ")}`,
-          "skill",
-          "high"
-        ),
-        ...analysis.gaps.map((gap) =>
-          memoryManager.storeFact(
-            student.id,
-            `Skill gap: ${gap}`,
-            "struggle",
-            "high"
-          )
-        ),
-        ...analysis.strengths.map((strength) =>
-          memoryManager.storeFact(
-            student.id,
-            `Strength: ${strength}`,
-            "milestone",
-            "medium"
-          )
-        ),
-      ]);
-    } catch (memoryErr) {
-      console.error("Memory storage error (non-fatal):", memoryErr);
-    }
-
-    // Auto-generate prep plan AFTER the response is sent so the client gets the
-    // analysis immediately. Plan generation is a second Sonnet call that can take
-    // 10–30s; awaiting it here used to push the route past Vercel's maxDuration
-    // and the client never saw the analysis (it only appeared after a refresh,
-    // because the DB writes above had already succeeded).
+    // Run memory fact writes and prep-plan generation AFTER the response is
+    // sent. Both are independent of the JSON the client needs, and the plan
+    // is a second LLM call that can take 10–30s. Keeping them off the
+    // critical path is what makes the repeat-upload → cached path feel
+    // instant and the first-upload path noticeably faster.
     after(async () => {
-      try {
-        const { generatePlanForStudent } = await import(
-          "@/server/agents/plan-generator"
-        );
-        await generatePlanForStudent({
-          id: student.id,
-          skills: analysis.skills,
-          readiness: analysis.readinessScore,
-          preferences: updatedPreferences,
-        });
-      } catch (planErr) {
-        console.error("Auto plan generation error (non-fatal):", planErr);
-      }
+      const studentId = student.id;
+      const memoryWrites = (async () => {
+        try {
+          const { memoryManager } = await import("@/server/memory/manager");
+          await Promise.all([
+            memoryManager.storeFact(
+              studentId,
+              `Readiness score: ${analysis.readinessScore}%. Top skills: ${analysis.skills
+                .sort((a, b) => b.level - a.level)
+                .slice(0, 3)
+                .map((s) => `${s.name} (${s.level}/10)`)
+                .join(", ")}`,
+              "skill",
+              "high"
+            ),
+            ...analysis.gaps.map((gap) =>
+              memoryManager.storeFact(studentId, `Skill gap: ${gap}`, "struggle", "high")
+            ),
+            ...analysis.strengths.map((strength) =>
+              memoryManager.storeFact(
+                studentId,
+                `Strength: ${strength}`,
+                "milestone",
+                "medium"
+              )
+            ),
+          ]);
+        } catch (memoryErr) {
+          console.error("Memory storage error (non-fatal):", memoryErr);
+        }
+      })();
+
+      const planWrite = (async () => {
+        try {
+          const { generatePlanForStudent } = await import(
+            "@/server/agents/plan-generator"
+          );
+          await generatePlanForStudent({
+            id: studentId,
+            skills: analysis.skills,
+            readiness: analysis.readinessScore,
+            preferences: updatedPreferences,
+          });
+        } catch (planErr) {
+          console.error("Auto plan generation error (non-fatal):", planErr);
+        }
+      })();
+
+      await Promise.all([memoryWrites, planWrite]);
     });
 
     return NextResponse.json({
       ...analysis,
-      _meta: { resumePages: pdfPages, resumeChars: resumeText.length },
+      _meta: { resumePages: pdfPages, resumeChars: resumeText.length, cached: false },
     });
   } catch (err) {
     console.error("Resume analysis error:", err);

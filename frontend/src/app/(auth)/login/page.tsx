@@ -326,7 +326,7 @@ export default function LoginPage() {
           <div className="h-4 w-px bg-slate-400"></div>
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
 
-            <span>PlaceAI</span>
+            <span>Mentora</span>
           </Link>
         </div>
 
@@ -457,7 +457,7 @@ export default function LoginPage() {
 
         <div className="relative z-20 flex items-center gap-8 text-sm text-slate-500">
           <p className="text-xs tracking-[0.16em] uppercase">
-            &copy; 2026 PlaceAI. Built for HackAI.
+            &copy; 2026 Mentora. Built for HackAI.
           </p>
         </div>
       </div>
@@ -473,7 +473,7 @@ export default function LoginPage() {
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div className="flex items-center justify-center text-lg font-semibold">
-              <span>PlaceAI</span>
+              <span>Mentora</span>
             </div>
             <div className="w-14" />
           </div>

@@ -15,9 +15,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "How It Works | PlaceAI",
+  title: "How It Works | Mentora",
   description:
-    "System documentation for PlaceAI covering architecture, memory, project diagrams, and product flowcharts.",
+    "System documentation for Mentora covering architecture, memory, project diagrams, and product flowcharts.",
 };
 
 const pageSections = [
@@ -118,7 +118,7 @@ export default function HowItWorksPage() {
           
           <div className="mb-14 max-w-8=9xl">
             <h2 className="text-3xl font-bold leading-relaxed text-neutral-900">
-              Agentic AI career coach blueprint with project diagrams, system flowcharts, and product architecture. This documentation provides an overview of the implementation, architecture, and deployment strategy for PlaceAI.
+              Agentic AI career coach blueprint with project diagrams, system flowcharts, and product architecture. This documentation provides an overview of the implementation, architecture, and deployment strategy for Mentora.
             </h2>
           </div>
         </FadeIn>
@@ -161,7 +161,7 @@ export default function HowItWorksPage() {
               
               <h3 className="mb-2 mt-8 text-lg font-semibold text-neutral-900">The Solution</h3>
               <p className="text-sm leading-relaxed text-neutral-700">
-                PlaceAI runs a multi-agent coaching system that diagnoses readiness, builds plans, tracks execution,
+                Mentora runs a multi-agent coaching system that diagnoses readiness, builds plans, tracks execution,
                 adapts mock interviews, and escalates risk signals through shared memory.
               </p>
             </Section>

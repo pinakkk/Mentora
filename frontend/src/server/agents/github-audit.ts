@@ -12,7 +12,7 @@ const GH_BASE = "https://api.github.com";
 function ghHeaders(): HeadersInit {
   const headers: Record<string, string> = {
     "Accept": "application/vnd.github+json",
-    "User-Agent": "PlaceAI-Diagnostic-Agent",
+    "User-Agent": "Mentora-Diagnostic-Agent",
     "X-GitHub-Api-Version": "2022-11-28",
   };
   if (process.env.GITHUB_TOKEN) {

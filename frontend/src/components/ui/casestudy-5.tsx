@@ -75,7 +75,7 @@ function CaseStudyLink({
           </div>
 
           <div className="flex items-center gap-2 text-sm font-medium text-[#1f1a38]">
-            Explore how PlaceAI helps
+            Explore how Mentora helps
             <MoveRight className="h-4 w-4 transition-transform duration-500 ease-out group-hover:translate-x-1" />
           </div>
         </div>
@@ -94,7 +94,7 @@ function CaseStudyLink({
                 </p>
               </div>
               <div className="border border-black/10 px-3 py-1 text-xs font-medium text-black/60">
-                PlaceAI
+                Mentora
               </div>
             </div>
 

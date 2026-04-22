@@ -29,5 +29,22 @@ export async function GET() {
     .limit(1)
     .single();
 
-  return NextResponse.json({ plan: plan || null });
+  // Map the snake_case DB row into the camelCase shape the client's
+  // PrepPlan type expects. Without this, `plan.durationWeeks` etc. are
+  // undefined on the client and render as "undefinedw Duration".
+  return NextResponse.json({ plan: plan ? toCamelPlan(plan) : null });
+}
+
+function toCamelPlan(row: Record<string, unknown>) {
+  return {
+    id: row.id,
+    studentId: row.student_id,
+    targetCompanies: row.target_companies ?? [],
+    durationWeeks: row.duration_weeks ?? 0,
+    phases: row.phases ?? [],
+    currentPhase: row.current_phase ?? 1,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }

@@ -50,7 +50,7 @@ export const landingPageText = {
     secondaryCta: "See How It Works",
     socialProofValue: "500+ students",
     socialProofLabel: "placed this year",
-    coachName: "PlaceAI Coach",
+    coachName: "Mentora Coach",
     coachStatus: "Online now",
     thinkingLabel: "Agent is thinking...",
     messages: [
@@ -81,7 +81,7 @@ export const landingPageText = {
     titleStart: "Agentic AI Coaching Built for",
     titleAccent: "Real Placement Offers",
     description:
-      "Not a chatbot. Not a question bank. PlaceAI runs 6 specialized agents that collaborate through shared memory — diagnosing, planning, practicing, and following through until you're placed.",
+      "Not a chatbot. Not a question bank. Mentora runs 6 specialized agents that collaborate through shared memory — diagnosing, planning, practicing, and following through until you're placed.",
     previewEyebrow: "Live Preview",
     previewPoweredBy: "Powered by 6 AI agents",
     features: [
@@ -147,7 +147,7 @@ export const landingPageText = {
         eyebrow: "Interview Confidence",
         title: "No more interview anxiety or blank-mind moments.",
         subtitle:
-          "PlaceAI runs adaptive mock rooms calibrated to each company's real interview patterns. You practice the exact round types — Technical, Behavioral, HR, and System Design — until they feel routine.",
+          "Mentora runs adaptive mock rooms calibrated to each company's real interview patterns. You practice the exact round types — Technical, Behavioral, HR, and System Design — until they feel routine.",
         points: [
           "Company-specific question banks",
           "Adaptive difficulty in real-time",
@@ -369,26 +369,26 @@ export const landingPageText = {
     titleStart: "Got Questions?",
     titleAccent: "We've Got Answers",
     description:
-      "Everything students and coordinators usually ask before starting with PlaceAI.",
+      "Everything students and coordinators usually ask before starting with Mentora.",
     defaultTab: "General",
     tabs: ["General", "Agents & Memory", "Interviews & Mock", "Technical", "Support"],
     items: {
       General: [
         {
-          q: "What is PlaceAI?",
-          a: "PlaceAI is an agentic AI career coach built for campus placements. It runs 6 specialized AI agents — Diagnostic, Planner, Accountability, Mock Interview, Escalation, and Memory — that collaborate through shared memory to give personalized, proactive, and persistent coaching.",
+          q: "What is Mentora?",
+          a: "Mentora is an agentic AI career coach built for campus placements. It runs 6 specialized AI agents — Diagnostic, Planner, Accountability, Mock Interview, Escalation, and Memory — that collaborate through shared memory to give personalized, proactive, and persistent coaching.",
         },
         {
-          q: "How is PlaceAI different from ChatGPT or VMock?",
-          a: "Unlike ChatGPT, PlaceAI has persistent 3-layer memory across sessions, proactively reaches out with nudges and opportunity alerts, creates company-specific prep plans, and runs adaptive mock interviews. VMock only scores resumes. PlaceAI acts like a real mentor — it thinks, decides, and follows through.",
+          q: "How is Mentora different from ChatGPT or VMock?",
+          a: "Unlike ChatGPT, Mentora has persistent 3-layer memory across sessions, proactively reaches out with nudges and opportunity alerts, creates company-specific prep plans, and runs adaptive mock interviews. VMock only scores resumes. Mentora acts like a real mentor — it thinks, decides, and follows through.",
         },
         {
-          q: "Who can use PlaceAI?",
+          q: "Who can use Mentora?",
           a: "Any university student preparing for campus placements, especially those targeting IT and software companies. TPC coordinators get a dedicated Admin Dashboard with batch-level insights, at-risk flags, and escalation alerts.",
         },
         {
-          q: "Is PlaceAI suitable for non-CS students?",
-          a: "Yes. The Diagnostic Agent identifies transferable skills from your background — many Mechanical and ECE students have successfully placed at IT companies using PlaceAI's profile mapping.",
+          q: "Is Mentora suitable for non-CS students?",
+          a: "Yes. The Diagnostic Agent identifies transferable skills from your background — many Mechanical and ECE students have successfully placed at IT companies using Mentora's profile mapping.",
         },
       ],
       "Agents & Memory": [
@@ -420,13 +420,13 @@ export const landingPageText = {
         },
         {
           q: "What is the Selection Probability Engine?",
-          a: "For each student-company pair, PlaceAI computes a match score weighted across skill match (35%), CGPA fit (15%), project relevance (20%), historical profile similarity (20%), and competition level (10%). It shows actionable levers — e.g., 'Complete system design module: +8% match' — so you know exactly what to fix.",
+          a: "For each student-company pair, Mentora computes a match score weighted across skill match (35%), CGPA fit (15%), project relevance (20%), historical profile similarity (20%), and competition level (10%). It shows actionable levers — e.g., 'Complete system design module: +8% match' — so you know exactly what to fix.",
         },
       ],
       Technical: [
         {
-          q: "What AI models does PlaceAI use?",
-          a: "PlaceAI uses Claude Sonnet 4 for all agent reasoning, coaching, and mock interview sessions. Claude Haiku 4.5 handles fast fact extraction and conversation summarization. OpenAI text-embedding-3-small generates vector embeddings for semantic memory and company RAG.",
+          q: "What AI models does Mentora use?",
+          a: "Mentora uses Claude Sonnet 4 for all agent reasoning, coaching, and mock interview sessions. Claude Haiku 4.5 handles fast fact extraction and conversation summarization. OpenAI text-embedding-3-small generates vector embeddings for semantic memory and company RAG.",
         },
         {
           q: "How is my data stored and secured?",
@@ -443,8 +443,8 @@ export const landingPageText = {
           a: "Sign up with your college email or Google account, upload your resume PDF, and set your target companies. The Diagnostic Agent immediately analyzes your profile and the Planner Agent creates your personalized prep plan — the whole onboarding takes under 5 minutes.",
         },
         {
-          q: "Is PlaceAI free?",
-          a: "PlaceAI offers a free tier with limited mock interviews and coaching sessions. Premium unlocks unlimited mocks, full memory history, the Coach's Notebook panel, and priority support. TPC institutions get dedicated pricing for batch access.",
+          q: "Is Mentora free?",
+          a: "Mentora offers a free tier with limited mock interviews and coaching sessions. Premium unlocks unlimited mocks, full memory history, the Coach's Notebook panel, and priority support. TPC institutions get dedicated pricing for batch access.",
         },
       ],
     },
@@ -457,10 +457,10 @@ export const landingPageText = {
       "Join hundreds of students who trained with 6 AI agents — and walked into placement drives actually prepared.",
     button: "Start Practicing Free",
     benefits: ["No credit card required", "Free mock interviews included", "Cancel anytime"],
-    brandWordmark: "PlaceAI",
+    brandWordmark: "Mentora",
   },
   footer: {
-    brand: "PlaceAI",
+    brand: "Mentora",
     description: "6 agentic AI coaches. One shared memory. One mission — getting you placed.",
     productTitle: "Product",
     productLinks: [
@@ -476,7 +476,7 @@ export const landingPageText = {
     ],
     connectTitle: "Connect",
     connectItems: ["Built for HackAI 2026", "Powered by Claude Sonnet 4", "Multi-agent · Memory-first"],
-    copyright: "© 2026 PlaceAI. Built with AI, for students who dream big.",
+    copyright: "© 2026 Mentora. Built with AI, for students who dream big.",
     status: "All systems operational",
   },
 } as const;

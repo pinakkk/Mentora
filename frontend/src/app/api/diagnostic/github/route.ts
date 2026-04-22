@@ -103,7 +103,7 @@ export async function POST(req: Request) {
     aiAudit = await generateJson({
       model: fastModel,
       schema: auditSchema,
-      prompt: `You are PlaceAI's Diagnostic Agent doing a GitHub coherence audit. Cross-reference the student's CLAIMED skills against what their PUBLIC GitHub actually shows.
+      prompt: `You are Mentora's Diagnostic Agent doing a GitHub coherence audit. Cross-reference the student's CLAIMED skills against what their PUBLIC GitHub actually shows.
 
 CLAIMED SKILLS:
 ${claimedSkillsList}

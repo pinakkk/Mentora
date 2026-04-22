@@ -1,6 +1,6 @@
-# PlaceAI — Agentic AI Career Coach: Final Blueprint
+# Mentora — Agentic AI Career Coach: Final Blueprint
 
-> **Project**: PlaceAI — Your AI Placement Mentor  
+> **Project**: Mentora — Your AI Placement Mentor  
 > **Problem Statement**: PS2 — Agentic AI Career Coach (with PS1 hybrid features)  
 > **Stack**: Next.js 15 + Supabase pgvector + Claude API + Vercel AI SDK  
 > **Date**: April 2026
@@ -40,13 +40,13 @@ No tool acts like a **real mentor** who:
 - Makes strategic decisions
 - Escalates when you're in trouble
 
-### The Solution: PlaceAI
+### The Solution: Mentora
 
 An **Agentic AI Career Coach** powered by 6 specialized agents that collaborate through shared memory. The AI doesn't just respond — it **thinks, decides, and acts autonomously**.
 
 ### What Makes This Different
 
-| Capability | ChatGPT | VMock | Big Interview | **PlaceAI** |
+| Capability | ChatGPT | VMock | Big Interview | **Mentora** |
 |-----------|---------|-------|---------------|-------------|
 | Memory across sessions | None | None | None | **Full 3-layer memory** |
 | Proactive outreach | None | None | None | **Autonomous nudges** |
@@ -58,7 +58,7 @@ An **Agentic AI Career Coach** powered by 6 specialized agents that collaborate 
 
 ### Hackathon Scoring Alignment
 
-| Criteria | Points | How PlaceAI Scores |
+| Criteria | Points | How Mentora Scores |
 |----------|--------|--------------------|
 | **Deployment** (20) | Working product | Deployed on Vercel, interactive, responsive |
 | **Presentation** (20) | Storytelling | "Meet Priya" narrative — judges chat with AI live |
@@ -1155,7 +1155,7 @@ src/app/
 **Chat Interface (Primary Interaction Point):**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  PlaceAI Coach                           [Memory] [Profile] │
+│  Mentora Coach                           [Memory] [Profile] │
 ├────────────────────────────────┬────────────────────────────┤
 │                                │  COACH'S NOTEBOOK          │
 │  ┌─────────────────────────┐   │                            │
@@ -1199,7 +1199,7 @@ src/app/
 **TPC Admin Dashboard:**
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  PlaceAI Admin — TPC Dashboard                    [Query AI] │
+│  Mentora Admin — TPC Dashboard                    [Query AI] │
 ├──────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
@@ -1492,10 +1492,10 @@ MINUTE 6-7: TPC VIEW + IMPACT
 - Switch to admin dashboard: batch overview, at-risk flags
 - Show alert: "Ankit has gone silent — here's what happened and what to do"
 - Show readiness: Priya went from 45 → 72 over the simulated journey
-- "Without PlaceAI: students figure it out alone.
-   With PlaceAI: personalized, persistent, proactive guidance at scale."
+- "Without Mentora: students figure it out alone.
+   With Mentora: personalized, persistent, proactive guidance at scale."
 ```
 
 ---
 
-*This blueprint is the complete technical specification for PlaceAI. It covers architecture, agents, memory, database, APIs, frontend, and deployment — everything needed to build the hackathon-winning Agentic AI Career Coach.*
+*This blueprint is the complete technical specification for Mentora. It covers architecture, agents, memory, database, APIs, frontend, and deployment — everything needed to build the hackathon-winning Agentic AI Career Coach.*

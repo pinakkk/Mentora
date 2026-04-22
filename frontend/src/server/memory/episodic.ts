@@ -28,9 +28,9 @@ const MAX_SUMMARIES = 5;
 const MAX_HOT_FACTS = 20;
 
 const k = {
-  summaries: (sid: string) => `placeai:ep:summaries:${sid}`,
-  hotFacts:  (sid: string) => `placeai:ep:hotfacts:${sid}`,
-  state:     (sid: string) => `placeai:ep:state:${sid}`,
+  summaries: (sid: string) => `mentora:ep:summaries:${sid}`,
+  hotFacts:  (sid: string) => `mentora:ep:hotfacts:${sid}`,
+  state:     (sid: string) => `mentora:ep:state:${sid}`,
 };
 
 export interface EpisodicSummary {

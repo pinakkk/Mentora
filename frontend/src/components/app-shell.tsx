@@ -57,7 +57,7 @@ function SidebarContent({
         className="flex items-center gap-2 px-3 mb-8"
       >
         <span className="text-lg font-semibold text-white tracking-tight">
-          PlaceAI
+          Mentora
         </span>
       </Link>
 

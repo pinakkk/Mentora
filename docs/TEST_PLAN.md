@@ -1,4 +1,4 @@
-# PlaceAI — Test Plan & QA Strategy
+# Mentora — Test Plan & QA Strategy
 
 > **Purpose**: Comprehensive test cases for the mock interview feature and overall application quality assurance  
 > **Testing Stack**: Vitest (unit), Playwright (E2E), k6 (load), custom scripts (security)  
@@ -1375,7 +1375,7 @@ test("TC-A012: Chat interface passes axe audit", async ({ page }) => {
 // tests/fixtures/users.ts
 export const TEST_USERS = {
   student: {
-    email: "test-student@placeai.test",
+    email: "test-student@mentora.test",
     password: "TestPass123!",
     name: "Priya Sharma",
     department: "CSE",
@@ -1383,13 +1383,13 @@ export const TEST_USERS = {
     year: 4,
   },
   admin: {
-    email: "test-admin@placeai.test",
+    email: "test-admin@mentora.test",
     password: "AdminPass123!",
     name: "TPC Admin",
     role: "tpc_admin",
   },
   emptyStudent: {
-    email: "test-empty@placeai.test",
+    email: "test-empty@mentora.test",
     password: "EmptyPass123!",
     name: "New Student",
     // No skills, no history
@@ -1420,7 +1420,7 @@ export async function seedTestData() {
     id: TEST_STUDENT_ID,
     auth_id: TEST_AUTH_ID,
     name: "Priya Sharma",
-    email: "test-student@placeai.test",
+    email: "test-student@mentora.test",
     department: "CSE",
     cgpa: 8.4,
     year: 4,

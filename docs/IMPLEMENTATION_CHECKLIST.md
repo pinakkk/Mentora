@@ -1,4 +1,4 @@
-# PlaceAI — Implementation Checklist
+# Mentora — Implementation Checklist
 
 > Snapshot of what's implemented vs. remaining after this session.
 > Date: 2026-04-10

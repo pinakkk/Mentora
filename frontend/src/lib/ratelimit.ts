@@ -46,7 +46,7 @@ function limiterFor(kind: Kind): Ratelimit | null {
     redis,
     limiter: Ratelimit.slidingWindow(quota.requests, `${quota.windowSec} s`),
     analytics: false,
-    prefix: `placeai:rl:${kind}`,
+    prefix: `mentora:rl:${kind}`,
   });
   _cache.set(kind, limiter);
   return limiter;

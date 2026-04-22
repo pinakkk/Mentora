@@ -1,4 +1,4 @@
-# PlaceAI — API Cost Analysis & Optimization Guide
+# Mentora — API Cost Analysis & Optimization Guide
 
 > **Purpose**: Complete inventory of all external API calls, per-user cost modeling, scaling projections, and optimization strategies  
 > **Last Updated**: April 2026  
@@ -21,7 +21,7 @@
 
 ## 1. API Call Inventory
 
-### 1.1 All External API Calls Made by PlaceAI
+### 1.1 All External API Calls Made by Mentora
 
 | # | Feature | API Provider | Model/Service | Endpoint | When Called |
 |---|---------|-------------|---------------|----------|------------|
@@ -461,7 +461,7 @@ CURRENT: Always use whisper-large-v3-turbo for STT
 OPTIMIZED: Use distil-whisper-large-v3-en for English-only users
 
 distil-whisper is even faster and cheaper for English-only transcription.
-Since PlaceAI targets Indian campus placements (English interviews),
+Since Mentora targets Indian campus placements (English interviews),
 this is a safe optimization.
 
 Savings: ~15-20% on STT costs (already minimal)

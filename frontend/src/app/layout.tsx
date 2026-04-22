@@ -15,7 +15,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "PlaceAI — Your AI Placement Mentor",
+  title: "Mentora — Your AI Placement Mentor",
   description:
     "Agentic AI Career Coach for university students. 6 specialized agents collaborate to diagnose, plan, coach, test, and follow up on your placement journey.",
 };

@@ -22,7 +22,7 @@ const testimonials = [
   {
     name: "Priya Sharma",
     title: "CSE, Final Year",
-    quote: "I used PlaceAI before applying to Infosys and landed the role. The mock interviews felt so real.",
+    quote: "I used Mentora before applying to Infosys and landed the role. The mock interviews felt so real.",
     company: "Infosys",
   },
   {
@@ -52,7 +52,7 @@ const testimonials = [
   {
     name: "Arjun Das",
     title: "Mech to IT switch",
-    quote: "PlaceAI identified my transferable skills I did not even know about. Got placed at Wipro.",
+    quote: "Mentora identified my transferable skills I did not even know about. Got placed at Wipro.",
     company: "Wipro",
   },
 ];

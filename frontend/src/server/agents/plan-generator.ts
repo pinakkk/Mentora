@@ -26,16 +26,20 @@ const planSchema = z.object({
       milestones: z.array(z.string()),
     })
   ),
-  tasks: z
-    .array(
-      z.object({
-        title: z.string(),
-        category: z.string().default("dsa"),
-        priority: z.string().default("medium"),
-        phase: z.string().default("Phase 1"),
-      })
-    )
-    .default([]),
+  // Every field is required at the schema level because Groq's strict
+  // json_schema mode rejects any `properties` key that isn't also in
+  // `required` — `.default()` / `.optional()` both trip that check. The
+  // model is told in the prompt which enum values to use, and the
+  // post-processing below defensively clamps category/priority to the
+  // valid set if the model picks something out of range.
+  tasks: z.array(
+    z.object({
+      title: z.string(),
+      category: z.string(),
+      priority: z.string(),
+      phase: z.string(),
+    })
+  ),
 });
 
 const validCategories = [
@@ -106,7 +110,7 @@ export async function generatePlanForStudent(student: StudentRow) {
   const result = await generateText({
     model: wrappedModel,
     output: Output.object({ schema: planSchema }),
-    prompt: `You are PlaceAI's Planner Agent. Generate a 4-week campus placement prep plan as JSON.
+    prompt: `You are Mentora's Planner Agent. Generate a 4-week campus placement prep plan as JSON.
 
 Student skills: ${skillContext}
 Strengths: ${strengthContext}

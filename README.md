@@ -1,8 +1,8 @@
-# PlaceAI — Agentic AI Career Coach
+# Mentora — Agentic AI Career Coach
 
 > Your AI placement mentor that **thinks, remembers, and acts** — not just responds.
 
-PlaceAI is a multi-agent AI system that acts as a personalized career coach for university students preparing for campus placements. Unlike chatbots that forget you after every conversation, PlaceAI maintains persistent memory, proactively follows up, and makes autonomous decisions about your preparation strategy.
+Mentora is a multi-agent AI system that acts as a personalized career coach for university students preparing for campus placements. Unlike chatbots that forget you after every conversation, Mentora maintains persistent memory, proactively follows up, and makes autonomous decisions about your preparation strategy.
 
 ---
 
@@ -156,7 +156,7 @@ If at risk → Escalation Agent alerts TPC with full context
 ## Project Structure
 
 ```
-placeai/
+mentora/
 ├── docs/BLUEPRINT.md          # Full technical blueprint
 ├── frontend/                  # Deployable Next.js app
 │   ├── prisma/                # Single Prisma schema/config
@@ -175,7 +175,7 @@ placeai/
 
 ```bash
 # Clone and install
-git clone <repo-url> && cd placeai
+git clone <repo-url> && cd mentora
 npm install
 
 # Environment
@@ -194,7 +194,7 @@ npm run dev
 ---
 
 
-# PlaceAI — Mock Interview: Implementation Plan (MVP)
+# Mentora — Mock Interview: Implementation Plan (MVP)
 
 > **Feature**: Voice-Based Mock Interview with AI Interviewer  
 > **Status**: Implementing  

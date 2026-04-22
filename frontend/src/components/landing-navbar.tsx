@@ -108,7 +108,7 @@ export default function LandingNavbar() {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center pl-4 pr-3">
             <span className="font-heading text-lg font-semibold tracking-tight">
-              PlaceAI
+              Mentora
             </span>
           </Link>
 

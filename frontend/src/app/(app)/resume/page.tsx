@@ -442,7 +442,7 @@ export default function ResumePage() {
               .
             </>
           }
-          description="Drop your PDF and PlaceAI extracts your skills, scores your placement readiness, and generates a personalized prep plan in under a minute."
+          description="Drop your PDF and Mentora extracts your skills, scores your placement readiness, and generates a personalized prep plan in under a minute."
         />
 
         {/* ── Upload + Score ──────────────────────────────── */}
